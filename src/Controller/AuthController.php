@@ -26,7 +26,7 @@ final class AuthController extends AbstractController
     #[OA\Post(
         operationId: 'signUp',
         description: 'Реєстрація нового юзера',
-        summary: 'Sign Up',
+        summary: 'Реєстрація',
     )]
     #[OA\Response(
         response: 200,
@@ -57,7 +57,7 @@ final class AuthController extends AbstractController
     #[OA\Post(
         operationId: 'login',
         description: 'Вхід користувача',
-        summary: 'login',
+        summary: 'Вхід',
     )]
     #[OA\Response(
         response: 200,
