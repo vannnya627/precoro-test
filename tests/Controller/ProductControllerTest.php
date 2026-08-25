@@ -217,11 +217,7 @@ class ProductControllerTest extends AbstractWebTestCase
 
     private function createProduct(ObjectManager $em): Product
     {
-        $product = new Product()
-            ->setName('Test Product')
-            ->setDescription('Test Description')
-            ->setPrice(100);
-
+        $product = Product::create('Test Product', 'Test Description', 100);
         $em->persist($product);
         $em->flush();
 

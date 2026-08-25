@@ -11,17 +11,11 @@ use App\Entity\Product;
 use App\Exception\ProductNotFoundException;
 use App\Repository\Interface\ProductRepositoryInterface;
 use App\Service\Interface\ProductServiceInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 final readonly class ProductService implements ProductServiceInterface
 {
     public function __construct(
         private ProductRepositoryInterface $productRepository,
-        private NormalizerInterface $normalizer,
-        private DenormalizerInterface $denormalizer,
     ) {
     }
 
@@ -40,11 +34,7 @@ final readonly class ProductService implements ProductServiceInterface
      */
     public function create(ProductRequestDTO $request): ProductResponseDTO
     {
-        $product = new Product()
-        ->setName($request->name)
-        ->setDescription($request->description)
-        ->setPrice($request->price);
-
+        $product = Product::create($request->name, $request->description, $request->price);
         $this->productRepository->saveAndCommit($product);
 
         return ProductResponseDTO::create($product);
@@ -55,11 +45,9 @@ final readonly class ProductService implements ProductServiceInterface
      */
     public function getAll(): array
     {
-        $products = $this->productRepository->findAll();
-
         return array_map(function (Product $product) {
             return ProductResponseDTO::create($product);
-        }, $products);
+        }, $this->productRepository->findProducts());
     }
 
     /**
@@ -72,14 +60,15 @@ final readonly class ProductService implements ProductServiceInterface
         if (null === $product) {
             throw new ProductNotFoundException();
         }
-
-        $dtoAsArray = $this->normalizer->normalize($request, null, [
-            AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-        ]);
-
-        $this->denormalizer->denormalize($dtoAsArray, Product::class, null, [
-            AbstractNormalizer::OBJECT_TO_POPULATE => $product,
-        ]);
+        if (null !== $request->name) {
+            $product->changeName($request->name);
+        }
+        if (null !== $request->price) {
+            $product->changePrice($request->price);
+        }
+        if (null !== $request->description) {
+            $product->changeDescription($request->description);
+        }
 
         $this->productRepository->saveAndCommit($product);
 

@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Service;
 
-use App\Entity\Cart;
 use App\Entity\CartItem;
 use App\Entity\Order;
-use App\Entity\OrderItem;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Exception\EmptyCartException;
+use App\Repository\Interface\CartItemRepositoryInterface;
 use App\Repository\Interface\OrderRepositoryInterface;
-use App\Repository\Interface\ProductRepositoryInterface;
 use App\Service\OrderService;
 use App\Tests\AbstractTestCase;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -22,14 +20,14 @@ use PHPUnit\Framework\MockObject\MockObject;
 class OrderServiceTest extends AbstractTestCase
 {
     private OrderRepositoryInterface|MockObject $orderRepository;
-    private ProductRepositoryInterface|MockObject $productRepository;
+    private CartItemRepositoryInterface|MockObject $cartItemRepository;
     private OrderService $orderService;
 
     protected function setUp(): void
     {
         $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
-        $this->productRepository = $this->createMock(ProductRepositoryInterface::class);
-        $this->orderService = new OrderService($this->orderRepository, $this->productRepository);
+        $this->cartItemRepository = $this->createMock(CartItemRepositoryInterface::class);
+        $this->orderService = new OrderService($this->orderRepository, $this->cartItemRepository);
     }
 
     /**
@@ -38,29 +36,18 @@ class OrderServiceTest extends AbstractTestCase
      */
     public function testCreate(): void
     {
-        $user = new User();
-        $this->setEntityId($user, 1);
+        $user = $this->createUser();
 
-        $cart = new Cart();
-        $user->setCart($cart);
+        $cart = $user->getCartOrCreate();
 
-        $productId = 1;
-        $product = new Product()
-            ->setName('name')
-            ->setDescription('description')
-            ->setPrice(123);
-        $this->setEntityId($product, $productId);
+        $product = $this->createProduct();
 
-        $cartItem = new CartItem()
-            ->setCart($cart)
-            ->setProduct($product)
-            ->setQuantity(2);
+        $cartItem = CartItem::create($cart, $product, 2);
 
-        $cart->addCartItem($cartItem);
-
-        $this->productRepository->expects($this->once())
-            ->method('findBy')
-            ->with(['id' => [1]]);
+        $this->cartItemRepository->expects($this->once())
+            ->method('findWithProducts')
+            ->with($user)
+            ->willReturn([$cartItem]);
 
         $this->orderRepository->expects($this->once())
             ->method('save')
@@ -72,6 +59,10 @@ class OrderServiceTest extends AbstractTestCase
                 $this->setEntityId($savedOrder, 99);
             });
 
+        $this->cartItemRepository->expects($this->once())
+            ->method('remove')
+            ->with($cartItem);
+
         $this->orderRepository->expects($this->once())
             ->method('commit');
 
@@ -81,8 +72,6 @@ class OrderServiceTest extends AbstractTestCase
         $this->assertEquals(246, $response->totalPrice);
         $this->assertEquals('NEW', $response->status);
         $this->assertCount(1, $response->orderItems);
-
-        $this->assertCount(0, $cart->getCartItems());
     }
 
     /**
@@ -91,11 +80,15 @@ class OrderServiceTest extends AbstractTestCase
      */
     public function testCreateWhenThrowsEmptyCartException(): void
     {
-        $user = new User();
-        $this->setEntityId($user, 1);
+        $user = $this->createUser();
 
-        $this->productRepository->expects($this->never())
-            ->method('findBy');
+        $this->cartItemRepository->expects($this->once())
+            ->method('findWithProducts')
+            ->with($user)
+            ->willReturn([]);
+
+        $this->cartItemRepository->expects($this->never())
+            ->method('remove');
 
         $this->orderRepository->expects($this->never())
             ->method('save');
@@ -113,10 +106,8 @@ class OrderServiceTest extends AbstractTestCase
      */
     public function testCreateWhenCartIsEmptyThrowsException(): void
     {
-        $user = new User();
-        $this->setEntityId($user, 1);
-
-        $user->setCart(new Cart());
+        $user = $this->createUser();
+        $cart = $user->getCartOrCreate();
 
         $this->expectException(EmptyCartException::class);
         $this->orderService->create($user);
@@ -127,29 +118,21 @@ class OrderServiceTest extends AbstractTestCase
      */
     public function testGetList(): void
     {
-        $user = new User();
-        $this->setEntityId($user, 1);
+        $user = $this->createUser();
 
-        $product = new Product()
-            ->setName('name')
-            ->setDescription('description')
-            ->setPrice(123);
-        $this->setEntityId($product, 1);
+        $product = $this->createProduct();
 
-        $order = new Order()
-            ->setUser($user)
-            ->setTotalPrice(246);
+        $cart = $user->getCartOrCreate();
+
+        $cartItem = CartItem::create($cart, $product, 2);
+
+        $order = Order::create($user);
         $this->setEntityId($order, 10);
 
-        $orderItem = new OrderItem()
-            ->setProduct($product)
-            ->setQuantity(2)
-            ->setPrice(123);
-
-        $order->addOrderItem($orderItem);
+        $orderItem = $order->consumeCartItem($cartItem);
 
         $this->orderRepository->expects($this->once())
-            ->method('findAllByUserId')
+            ->method('findAllByUserIdWithProduct')
             ->with($user->getId())
             ->willReturn([$order]);
 
@@ -173,16 +156,38 @@ class OrderServiceTest extends AbstractTestCase
      */
     public function testGetListWhenUserHasNoOrders(): void
     {
-        $user = new User();
-        $this->setEntityId($user, 1);
-
+        $user = $this->createUser();
         $this->orderRepository->expects($this->once())
-            ->method('findAllByUserId')
+            ->method('findAllByUserIdWithProduct')
             ->with($user->getId())
             ->willReturn([]);
 
         $response = $this->orderService->getList($user);
 
         $this->assertEquals([], $response);
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    private function createUser(): User
+    {
+        $userId = 1;
+        $user = User::createCustomer('test@gmail.com', 'dsgsfggdsgds');
+        $this->setEntityId($user, $userId);
+
+        return $user;
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    private function createProduct(): Product
+    {
+        $productId = 1;
+        $product = Product::create('Test Product', 'Test Description', 123);
+        $this->setEntityId($product, $productId);
+
+        return $product;
     }
 }

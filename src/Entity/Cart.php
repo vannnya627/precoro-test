@@ -20,7 +20,7 @@ final class Cart
 
     #[ORM\OneToOne(inversedBy: 'cart', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    private User $user;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -40,8 +40,9 @@ final class Cart
     )]
     private Collection $cartItems;
 
-    public function __construct()
+    public function __construct(User $user)
     {
+        $this->user = $user;
         $this->cartItems = new ArrayCollection();
     }
 
@@ -50,16 +51,9 @@ final class Cart
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getUser(): User
     {
         return $this->user;
-    }
-
-    public function setUser(User $user): static
-    {
-        $this->user = $user;
-
-        return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable
@@ -67,23 +61,9 @@ final class Cart
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
     }
 
     #[ORM\PrePersist]
@@ -100,18 +80,17 @@ final class Cart
     }
 
     /**
-     * @return Collection<int, CartItem>
+     * @return array<int, CartItem>
      */
-    public function getCartItems(): Collection
+    public function getCartItems(): array
     {
-        return $this->cartItems;
+        return $this->cartItems->toArray();
     }
 
     public function addCartItem(CartItem $cartItem): static
     {
         if (!$this->cartItems->contains($cartItem)) {
             $this->cartItems->add($cartItem);
-            $cartItem->setCart($this);
         }
 
         return $this;

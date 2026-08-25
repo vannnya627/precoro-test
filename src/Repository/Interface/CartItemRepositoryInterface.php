@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Repository\Interface;
 
+use App\Entity\Cart;
 use App\Entity\CartItem;
+use App\Entity\Product;
+use App\Entity\User;
 
 interface CartItemRepositoryInterface
 {
     /**
-     * @param array<string, mixed>       $criteria
-     * @param array<string, string>|null $orderBy
-     *
-     * @return CartItem|null
+     * @return list<CartItem>
      */
-    public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
+    public function findWithProducts(User $user): array;
+
+    public function remove(CartItem $cartItem): void;
+
+    public function findByCartAndProduct(Cart $cart, Product $product): ?CartItem;
 }

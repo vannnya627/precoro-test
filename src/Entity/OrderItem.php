@@ -39,23 +39,9 @@ final class OrderItem
         return $this->order;
     }
 
-    public function setOrder(Order $order): static
-    {
-        $this->order = $order;
-
-        return $this;
-    }
-
     public function getProduct(): Product
     {
         return $this->product;
-    }
-
-    public function setProduct(Product $product): static
-    {
-        $this->product = $product;
-
-        return $this;
     }
 
     public function getQuantity(): int
@@ -63,22 +49,19 @@ final class OrderItem
         return $this->quantity;
     }
 
-    public function setQuantity(int $quantity): static
-    {
-        $this->quantity = $quantity;
-
-        return $this;
-    }
-
     public function getPrice(): int
     {
         return $this->price;
     }
 
-    public function setPrice(int $price): static
+    public static function create(Order $order, CartItem $cartItem): static
     {
-        $this->price = $price;
+        $orderItem = new static();
+        $orderItem->order = $order;
+        $orderItem->product = $cartItem->getProduct();
+        $orderItem->quantity = $cartItem->getQuantity();
+        $orderItem->price = $cartItem->getProduct()->getPrice();
 
-        return $this;
+        return $orderItem;
     }
 }

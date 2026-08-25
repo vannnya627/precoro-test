@@ -9,7 +9,7 @@ use App\Entity\User;
 use App\Tests\AbstractWebTestCase;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
 class OrderControllerTest extends AbstractWebTestCase
 {
@@ -171,13 +171,11 @@ class OrderControllerTest extends AbstractWebTestCase
 
     private function createUser(ObjectManager $em): void
     {
-        $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+        $passwordHasherFactory = static::getContainer()->get(PasswordHasherFactoryInterface::class);
+        $hasher = $passwordHasherFactory->getPasswordHasher(User::class);
+        $passwordHash = $hasher->hash('password');
 
-        $user = new User()
-            ->setEmail('user@test.com')
-            ->setRoles(['ROLE_USER']);
-
-        $user->setPassword($passwordHasher->hashPassword($user, 'password'));
+        $user = User::createCustomer('user@test.com', $passwordHash);
 
         $em->persist($user);
         $em->flush();
@@ -185,10 +183,7 @@ class OrderControllerTest extends AbstractWebTestCase
 
     private function createProduct(ObjectManager $em, string $name = 'Test Product', int $price = 100): Product
     {
-        $product = new Product()
-            ->setName($name)
-            ->setDescription('Test Description')
-            ->setPrice($price);
+        $product = Product::create($name, 'Test Description', $price);
 
         $em->persist($product);
         $em->flush();

@@ -6,7 +6,6 @@ namespace App\Service;
 
 use App\DTO\Request\AddItemRequestDTO;
 use App\DTO\Response\CartItemResponseDTO;
-use App\Entity\Cart;
 use App\Entity\CartItem;
 use App\Entity\User;
 use App\Exception\ProductNotFoundException;
@@ -35,25 +34,15 @@ final readonly class CartService implements CartServiceInterface
             throw new ProductNotFoundException();
         }
 
-        $cart = $user->getCart();
-        if (null === $cart) {
-            $cart = new Cart();
-            $user->setCart($cart);
-        }
+        $cart = $user->getCartOrCreate();
 
-        /** @var Cart $cart */
-        $existingItem = $this->cartItemRepository->findOneBy([
-            'cart' => $cart,
-            'product' => $product,
-        ]);
+        $existingItem = $this->cartItemRepository->findByCartAndProduct($cart, $product);
 
+        $quantity = $request->quantity;
         if (null !== $existingItem) {
-            $existingItem->setQuantity($existingItem->getQuantity() + $request->quantity);
+            $existingItem->addQuantity($quantity);
         } else {
-            $newItem = new CartItem()
-                ->setCart($cart)
-                ->setProduct($product)
-                ->setQuantity($request->quantity);
+            $newItem = CartItem::create($cart, $product, $quantity);
 
             $cart->addCartItem($newItem);
         }
@@ -63,20 +52,6 @@ final readonly class CartService implements CartServiceInterface
 
     public function getList(User $user): array
     {
-        /** @var list<CartItem> $cartItems */
-        $cartItems = $user->getCart()?->getCartItems()->toArray();
-
-        if (empty($cartItems)) {
-            return [];
-        }
-
-        $productIds = [];
-        foreach ($cartItems as $item) {
-            $productIds[] = $item->getProduct()->getId();
-        }
-
-        $this->productRepository->findBy(['id' => $productIds]);
-
         return array_map(function (CartItem $item): CartItemResponseDTO {
             $product = $item->getProduct();
 
@@ -85,6 +60,6 @@ final readonly class CartService implements CartServiceInterface
                 productName: $product->getName(),
                 quantity: $item->getQuantity(),
             );
-        }, $cartItems);
+        }, $this->cartItemRepository->findWithProducts($user));
     }
 }

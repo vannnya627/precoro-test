@@ -7,7 +7,7 @@ namespace App\Tests\Controller;
 use App\Entity\User;
 use App\Tests\AbstractWebTestCase;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
 class AuthControllerTest extends AbstractWebTestCase
 {
@@ -202,14 +202,11 @@ class AuthControllerTest extends AbstractWebTestCase
 
     private function createUser(ObjectManager $em): void
     {
-        $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+        $passwordHasherFactory = static::getContainer()->get(PasswordHasherFactoryInterface::class);
+        $hasher = $passwordHasherFactory->getPasswordHasher(User::class);
+        $passwordHash = $hasher->hash('password');
 
-        $user = new User()
-            ->setEmail('test@test.com')
-            ->setRoles(['ROLE_USER']);
-
-        $passwordHash = $passwordHasher->hashPassword($user, 'password');
-        $user->setPassword($passwordHash);
+        $user = User::createCustomer('test@test.com', $passwordHash);
 
         $em->persist($user);
         $em->flush();

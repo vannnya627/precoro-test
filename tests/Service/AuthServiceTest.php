@@ -14,22 +14,23 @@ use App\Tests\AbstractTestCase;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 
 #[AllowMockObjectsWithoutExpectations]
 class AuthServiceTest extends AbstractTestCase
 {
     private UserRepositoryInterface|MockObject $userRepository;
-    private UserPasswordHasherInterface|MockObject $passwordHasher;
+    private PasswordHasherFactoryInterface|MockObject $passwordHasherFactory;
     private JWTTokenManagerInterface|MockObject $JWTTokenManager;
     private AuthService $authService;
 
     protected function setUp(): void
     {
         $this->userRepository = $this->createMock(UserRepositoryInterface::class);
-        $this->passwordHasher = $this->createMock(UserPasswordHasherInterface::class);
+        $this->passwordHasherFactory = $this->createMock(PasswordHasherFactoryInterface::class);
         $this->JWTTokenManager = $this->createMock(JWTTokenManagerInterface::class);
-        $this->authService = new AuthService($this->userRepository, $this->passwordHasher, $this->JWTTokenManager);
+        $this->authService = new AuthService($this->userRepository, $this->passwordHasherFactory, $this->JWTTokenManager);
     }
 
     /**
@@ -49,17 +50,13 @@ class AuthServiceTest extends AbstractTestCase
             ->with($request->email)
             ->willReturn(null);
 
-        $this->passwordHasher->expects($this->once())
-            ->method('hashPassword')
-            ->with($this->isInstanceOf(User::class), $request->password)
-            ->willReturn($passwordHash);
+        $hasherMock = $this->createMock(PasswordHasherInterface::class);
+        $this->passwordHasherFactory->expects($this->once())
+            ->method('getPasswordHasher')
+            ->with(User::class)
+            ->willReturn($hasherMock);
 
-        $userId = 1;
-        $user = new User()
-            ->setPassword($passwordHash)
-            ->setEmail($request->email)
-            ->setRoles(['ROLE_USER']);
-        $this->setEntityId($user, $userId);
+        $user = $this->createUser($request->email, $passwordHash);
 
         $this->userRepository->expects($this->once())
             ->method('saveAndCommit')
@@ -72,7 +69,9 @@ class AuthServiceTest extends AbstractTestCase
         $token = 'testToken';
         $this->JWTTokenManager->expects($this->once())
             ->method('create')
-            ->with($user)
+            ->with($this->callback(function (User $createdUser) {
+                return 'test@test.com' === $createdUser->getEmail();
+            }))
             ->willReturn($token);
 
         $expectedResponse = new SignUpResponseDTO(
@@ -97,20 +96,15 @@ class AuthServiceTest extends AbstractTestCase
 
         $passwordHash = 'gdfgergerer3r34t4gffrerhg';
 
-        $user = new User()
-            ->setPassword($passwordHash)
-            ->setEmail($request->email)
-            ->setRoles(['ROLE_USER']);
-        $userId = 1;
-        $this->setEntityId($user, $userId);
+        $user = $this->createUser($request->email, $passwordHash);
 
         $this->userRepository->expects($this->once())
             ->method('existByEmail')
             ->with($request->email)
             ->willReturn($user);
 
-        $this->passwordHasher->expects($this->never())
-            ->method('hashPassword');
+        $this->passwordHasherFactory->expects($this->never())
+            ->method('getPasswordHasher');
 
         $this->userRepository->expects($this->never())
             ->method('saveAndCommit');
@@ -120,5 +114,17 @@ class AuthServiceTest extends AbstractTestCase
 
         $this->expectException(UserAlreadyExistsException::class);
         $this->authService->signUp($request);
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    private function createUser(string $email, string $passwordHash): User
+    {
+        $userId = 1;
+        $user = User::createCustomer($email, $passwordHash);
+        $this->setEntityId($user, $userId);
+
+        return $user;
     }
 }

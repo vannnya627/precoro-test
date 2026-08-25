@@ -46,39 +46,23 @@ class CartServiceTest extends AbstractTestCase
             quantity: 1,
         );
 
-        $user = new User()
-            ->setPassword('12345')
-            ->setEmail('test@gmail.com')
-            ->setRoles(['ROLE_USER']);
-        $userId = 1;
-        $this->setEntityId($user, $userId);
+        $user = $this->createUser();
 
-        $cart = new Cart();
-        $user->setCart($cart);
+        $cart = $user->getCartOrCreate();
 
-        $productId = 1;
-        $product = new Product()
-            ->setName('name')
-            ->setDescription('description')
-            ->setPrice(123);
-        $this->setEntityId($product, $productId);
+        $product = $this->createProduct();
+        $productId = $product->getId();
 
         $this->productRepository->expects($this->once())
             ->method('findById')
             ->with($productId)
             ->willReturn($product);
 
-        $cartItem = new CartItem()
-            ->setCart($cart)
-            ->setProduct($product)
-            ->setQuantity(1);
+        $cartItem = CartItem::create($cart, $product, $request->quantity);
 
         $this->cartItemRepository->expects($this->once())
-            ->method('findOneBy')
-            ->with([
-                'cart' => $cart,
-                'product' => $product,
-            ])
+            ->method('findByCartAndProduct')
+            ->with($cart, $product)
             ->willReturn($cartItem);
 
         $this->cartRepository->expects($this->once())
@@ -101,14 +85,8 @@ class CartServiceTest extends AbstractTestCase
             quantity: 1,
         );
 
-        $user = new User()
-            ->setPassword('12345')
-            ->setEmail('test@gmail.com')
-            ->setRoles(['ROLE_USER']);
-        $userId = 1;
-        $this->setEntityId($user, $userId);
-
-        $productId = 1;
+        $user = $this->createUser();
+        $productId = $request->productId;
 
         $this->productRepository->expects($this->once())
             ->method('findById')
@@ -116,7 +94,7 @@ class CartServiceTest extends AbstractTestCase
             ->willReturn(null);
 
         $this->cartItemRepository->expects($this->never())
-            ->method('findOneBy');
+            ->method('findByCartAndProduct');
 
         $this->cartRepository->expects($this->never())
             ->method('saveAndCommit');
@@ -136,22 +114,12 @@ class CartServiceTest extends AbstractTestCase
             quantity: 1,
         );
 
-        $user = new User()
-            ->setPassword('12345')
-            ->setEmail('test@gmail.com')
-            ->setRoles(['ROLE_USER']);
-        $userId = 1;
-        $this->setEntityId($user, $userId);
+        $user = $this->createUser();
 
-        $cart = new Cart();
-        $user->setCart($cart);
+        $cart = $user->getCartOrCreate();
 
-        $productId = 1;
-        $product = new Product()
-            ->setName('name')
-            ->setDescription('description')
-            ->setPrice(123);
-        $this->setEntityId($product, $productId);
+        $product = $this->createProduct();
+        $productId = $product->getId();
 
         $this->productRepository->expects($this->once())
             ->method('findById')
@@ -159,22 +127,19 @@ class CartServiceTest extends AbstractTestCase
             ->willReturn($product);
 
         $this->cartItemRepository->expects($this->once())
-            ->method('findOneBy')
-            ->with([
-                'cart' => $cart,
-                'product' => $product,
-            ])
+            ->method('findByCartAndProduct')
+            ->with($cart, $product)
             ->willReturn(null);
 
         $this->cartRepository->expects($this->once())
             ->method('saveAndCommit')
-            ->with($cart);
+            ->with($this->isInstanceOf(Cart::class));
 
         $this->cartService->addItem($request, $user);
 
         $this->assertCount(1, $cart->getCartItems());
 
-        $addedItem = $cart->getCartItems()->first();
+        $addedItem = $cart->getCartItems()[0];
 
         $this->assertEquals(1, $addedItem->getQuantity());
         $this->assertSame($product, $addedItem->getProduct());
@@ -189,23 +154,22 @@ class CartServiceTest extends AbstractTestCase
     {
         $request = new AddItemRequestDTO(productId: 1, quantity: 1);
 
-        $user = new User();
-        $this->setEntityId($user, 1);
+        $user = $this->createUser();
 
-        $product = new Product()->setName('name')->setPrice(123);
-        $this->setEntityId($product, 1);
+        $product = $this->createProduct();
 
         $this->productRepository->expects($this->once())
             ->method('findById')
             ->willReturn($product);
 
         $this->cartItemRepository->expects($this->once())
-            ->method('findOneBy')
-            ->with($this->callback(function ($criteria) use ($product, $user) {
-                return $criteria['cart'] instanceof Cart
-                    && $criteria['cart']->getUser() === $user
-                    && $criteria['product'] === $product;
-            }))
+            ->method('findByCartAndProduct')
+            ->with(
+                $this->callback(function (Cart $savedCart) use ($user) {
+                    return $savedCart->getUser() === $user;
+                }),
+                $this->identicalTo($product)
+            )
             ->willReturn(null);
 
         $this->cartRepository->expects($this->once())
@@ -225,34 +189,18 @@ class CartServiceTest extends AbstractTestCase
      */
     public function testGetList(): void
     {
-        $user = new User()
-            ->setPassword('12345')
-            ->setEmail('test@gmail.com')
-            ->setRoles(['ROLE_USER']);
-        $userId = 1;
-        $this->setEntityId($user, $userId);
+        $user = $this->createUser();
 
-        $cart = new Cart();
-        $user->setCart($cart);
+        $cart = $user->getCartOrCreate();
 
-        $productId = 1;
-        $product = new Product()
-            ->setName('name')
-            ->setDescription('description')
-            ->setPrice(123);
-        $this->setEntityId($product, $productId);
+        $product = $this->createProduct();
 
-        $cartItem = new CartItem()
-            ->setCart($cart)
-            ->setProduct($product)
-            ->setQuantity(1);
+        $cartItem = CartItem::create($cart, $product, 1);
 
-        $cart->addCartItem($cartItem);
-
-        $this->productRepository->expects($this->once())
-            ->method('findBy')
-            ->with(['id' => [$productId]])
-            ->willReturn([$product]);
+        $this->cartItemRepository->expects($this->once())
+            ->method('findWithProducts')
+            ->with($user)
+            ->willReturn([$cartItem]);
 
         $expectedResponse = [
             new CartItemResponseDTO(
@@ -266,14 +214,43 @@ class CartServiceTest extends AbstractTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function testGetListWhenCartIsEmpty(): void
     {
-        $user = new User();
-
-        $this->productRepository->expects($this->never())->method('findBy');
+        $user = $this->createUser();
+        $this->cartItemRepository->expects($this->once())
+            ->method('findWithProducts')
+            ->with($user)
+            ->willReturn([]);
 
         $response = $this->cartService->getList($user);
 
         $this->assertEquals([], $response);
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    private function createUser(): User
+    {
+        $userId = 1;
+        $user = User::createCustomer('test@gmail.com', 'dsgsfggdsgds');
+        $this->setEntityId($user, $userId);
+
+        return $user;
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    private function createProduct(): Product
+    {
+        $productId = 1;
+        $product = Product::create('Test Product', 'Test Description', 100);
+        $this->setEntityId($product, $productId);
+
+        return $product;
     }
 }

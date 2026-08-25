@@ -11,7 +11,7 @@ interface OrderRepositoryInterface
     /**
      * @return list<Order>
      */
-    public function findAllByUserId(int $userId): array;
+    public function findAllByUserIdWithProduct(int $userId): array;
 
     public function save(Order $order): void;
 

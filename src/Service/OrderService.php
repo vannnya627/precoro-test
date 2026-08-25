@@ -10,15 +10,15 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\User;
 use App\Exception\EmptyCartException;
+use App\Repository\Interface\CartItemRepositoryInterface;
 use App\Repository\Interface\OrderRepositoryInterface;
-use App\Repository\Interface\ProductRepositoryInterface;
 use App\Service\Interface\OrderServiceInterface;
 
 final readonly class OrderService implements OrderServiceInterface
 {
     public function __construct(
         private OrderRepositoryInterface $orderRepository,
-        private ProductRepositoryInterface $productRepository,
+        private CartItemRepositoryInterface $cartItemRepository,
     ) {
     }
 
@@ -27,38 +27,20 @@ final readonly class OrderService implements OrderServiceInterface
      */
     public function create(User $user): OrderResponseDTO
     {
-        $cart = $user->getCart();
-
-        if (null === $cart || $cart->getCartItems()->isEmpty()) {
+        $cartItems = $this->cartItemRepository->findWithProducts($user);
+        if (empty($cartItems)) {
             throw new EmptyCartException();
         }
 
-        $order = new Order()
-        ->setUser($user);
+        $order = Order::create($user);
 
-        $productIds = [];
-        foreach ($cart->getCartItems() as $item) {
-            $productIds[] = $item->getProduct()->getId();
-        }
-        $this->productRepository->findBy(['id' => $productIds]);
-
-        $totalPrice = 0;
         $orderItems = [];
-        foreach ($cart->getCartItems() as $cartItem) {
-            $orderItem = new OrderItem()
-                ->setProduct($cartItem->getProduct())
-                ->setQuantity($cartItem->getQuantity())
-                ->setPrice($cartItem->getProduct()->getPrice());
-
-            $totalPrice += $orderItem->getPrice() * $orderItem->getQuantity();
-
-            $order->addOrderItem($orderItem);
+        foreach ($cartItems as $cartItem) {
+            $orderItem = $order->consumeCartItem($cartItem);
             $orderItems[] = $orderItem;
+
+            $this->cartItemRepository->remove($cartItem);
         }
-
-        $order->setTotalPrice($totalPrice);
-
-        $cart->getCartItems()->clear();
 
         $this->orderRepository->save($order);
         $this->orderRepository->commit();
@@ -67,7 +49,7 @@ final readonly class OrderService implements OrderServiceInterface
             return OrderItemResponseDTO::create($orderItem);
         }, $orderItems);
 
-        return $this->mapToOrderResponseDTO($order, $orderItemsDTO);
+        return $this->mapToOrderDTO($order, $orderItemsDTO);
     }
 
     /**
@@ -75,7 +57,7 @@ final readonly class OrderService implements OrderServiceInterface
      */
     public function getList(User $user): array
     {
-        $orders = $this->orderRepository->findAllByUserId($user->getId());
+        $orders = $this->orderRepository->findAllByUserIdWithProduct($user->getId());
 
         $result = [];
         foreach ($orders as $order) {
@@ -84,7 +66,7 @@ final readonly class OrderService implements OrderServiceInterface
                 $orderItemsDTO[] = OrderItemResponseDTO::create($orderItem);
             }
 
-            $result[] = $this->mapToOrderResponseDTO($order, $orderItemsDTO);
+            $result[] = $this->mapToOrderDTO($order, $orderItemsDTO);
         }
 
         return $result;
@@ -93,7 +75,7 @@ final readonly class OrderService implements OrderServiceInterface
     /**
      * @param list<OrderItemResponseDTO> $orderItemsDTO
      */
-    private function mapToOrderResponseDTO(Order $order, array $orderItemsDTO): OrderResponseDTO
+    private function mapToOrderDTO(Order $order, array $orderItemsDTO): OrderResponseDTO
     {
         return new OrderResponseDTO(
             id: $order->getId(),

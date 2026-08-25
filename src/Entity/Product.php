@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
-class Product
+final class Product
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -42,23 +42,9 @@ class Product
         return $this->name;
     }
 
-    public function setName(string $name): static
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
     public function getDescription(): string
     {
         return $this->description;
-    }
-
-    public function setDescription(string $description): static
-    {
-        $this->description = $description;
-
-        return $this;
     }
 
     public function getPrice(): int
@@ -66,35 +52,14 @@ class Product
         return $this->price;
     }
 
-    public function setPrice(int $price): static
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
     }
 
     #[ORM\PrePersist]
@@ -108,5 +73,30 @@ class Product
     public function setUpdatedAtValue(): void
     {
         $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public static function create(string $name, string $description, int $price): static
+    {
+        $product = new static();
+        $product->name = $name;
+        $product->description = $description;
+        $product->price = $price;
+
+        return $product;
+    }
+
+    public function changeName(string $newName): void
+    {
+        $this->name = $newName;
+    }
+
+    public function changePrice(int $newPrice): void
+    {
+        $this->price = $newPrice;
+    }
+
+    public function changeDescription(string $newDescription): void
+    {
+        $this->description = $newDescription;
     }
 }

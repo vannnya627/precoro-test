@@ -62,23 +62,9 @@ final class Order
         return $this->user;
     }
 
-    public function setUser(?User $user): static
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
     public function getTotalPrice(): int
     {
         return $this->totalPrice;
-    }
-
-    public function setTotalPrice(int $totalPrice): static
-    {
-        $this->totalPrice = $totalPrice;
-
-        return $this;
     }
 
     public function getStatus(): OrderStatus
@@ -86,35 +72,14 @@ final class Order
         return $this->status;
     }
 
-    public function setStatus(OrderStatus $status): static
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
     }
 
     #[ORM\PrePersist]
@@ -138,20 +103,38 @@ final class Order
         return $this->orderItems;
     }
 
-    public function addOrderItem(OrderItem $orderItem): static
-    {
-        if (!$this->orderItems->contains($orderItem)) {
-            $this->orderItems->add($orderItem);
-            $orderItem->setOrder($this);
-        }
-
-        return $this;
-    }
-
     public function removeOrderItem(OrderItem $orderItem): static
     {
         $this->orderItems->removeElement($orderItem);
 
         return $this;
+    }
+
+    private function recalculateTotalPrice(): void
+    {
+        $this->totalPrice = 0;
+        foreach ($this->orderItems as $item) {
+            $this->totalPrice += $item->getPrice() * $item->getQuantity();
+        }
+    }
+
+    public function consumeCartItem(CartItem $cartItem): OrderItem
+    {
+        $orderItem = OrderItem::create($this, $cartItem);
+
+        if (!$this->orderItems->contains($orderItem)) {
+            $this->orderItems->add($orderItem);
+            $this->recalculateTotalPrice();
+        }
+
+        return $orderItem;
+    }
+
+    public static function create(User $user): static
+    {
+        $order = new static();
+        $order->user = $user;
+
+        return $order;
     }
 }

@@ -24,7 +24,7 @@ final class OrderRepository extends ServiceEntityRepository implements OrderRepo
     /**
      * @return list<Order>
      */
-    public function findAllByUserId(int $userId): array
+    public function findAllByUserIdWithProduct(int $userId): array
     {
         /** @var list<Order> $result */
         $result = $this->createQueryBuilder('o')

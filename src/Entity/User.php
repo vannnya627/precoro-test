@@ -66,13 +66,6 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): static
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
     /**
      * A visual identifier that represents this user.
      *
@@ -98,16 +91,6 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @param list<string> $roles
-     */
-    public function setRoles(array $roles): static
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
-
-    /**
      * @see PasswordAuthenticatedUserInterface
      */
     public function getPassword(): string
@@ -115,7 +98,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    public function changePassword(string $password): static
     {
         $this->password = $password;
 
@@ -133,23 +116,9 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->createdAt;
     }
 
-    public function setCreatedAt(?\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
     }
 
     #[ORM\PrePersist]
@@ -170,18 +139,6 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->cart;
     }
 
-    public function setCart(Cart $cart): static
-    {
-        // set the owning side of the relation if necessary
-        if ($cart->getUser() !== $this) {
-            $cart->setUser($this);
-        }
-
-        $this->cart = $cart;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Order>
      */
@@ -194,7 +151,6 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->orders->contains($order)) {
             $this->orders->add($order);
-            $order->setUser($this);
         }
 
         return $this;
@@ -205,5 +161,24 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->orders->removeElement($order);
 
         return $this;
+    }
+
+    public function getCartOrCreate(): Cart
+    {
+        if (null === $this->cart) {
+            $this->cart = new Cart($this);
+        }
+
+        return $this->cart;
+    }
+
+    public static function createCustomer(string $email, string $passwordHash): self
+    {
+        $user = new self();
+        $user->email = $email;
+        $user->roles = ['ROLE_USER'];
+        $user->password = $passwordHash;
+
+        return $user;
     }
 }

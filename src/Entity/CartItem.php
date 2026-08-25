@@ -36,23 +36,9 @@ final class CartItem
         return $this->cart;
     }
 
-    public function setCart(Cart $cart): static
-    {
-        $this->cart = $cart;
-
-        return $this;
-    }
-
     public function getProduct(): Product
     {
         return $this->product;
-    }
-
-    public function setProduct(Product $product): static
-    {
-        $this->product = $product;
-
-        return $this;
     }
 
     public function getQuantity(): int
@@ -60,10 +46,18 @@ final class CartItem
         return $this->quantity;
     }
 
-    public function setQuantity(int $quantity): static
+    public function addQuantity(int $quantity): void
     {
-        $this->quantity = $quantity;
+        $this->quantity += $quantity;
+    }
 
-        return $this;
+    public static function create(Cart $cart, Product $product, int $quantity): static
+    {
+        $cartItem = new static();
+        $cartItem->cart = $cart;
+        $cartItem->product = $product;
+        $cartItem->quantity = $quantity;
+
+        return $cartItem;
     }
 }

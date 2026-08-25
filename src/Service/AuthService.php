@@ -11,13 +11,13 @@ use App\Exception\UserAlreadyExistsException;
 use App\Repository\Interface\UserRepositoryInterface;
 use App\Service\Interface\AuthServiceInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
 final readonly class AuthService implements AuthServiceInterface
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
-        private UserPasswordHasherInterface $passwordHasher,
+        private PasswordHasherFactoryInterface $passwordHasherFactory,
         private JWTTokenManagerInterface $JWTTokenManager,
     ) {
     }
@@ -27,16 +27,15 @@ final readonly class AuthService implements AuthServiceInterface
      */
     public function signUp(SignUpRequestDTO $request): SignUpResponseDTO
     {
-        if ($this->userRepository->existByEmail($request->email)) {
+        $email = $request->email;
+        if ($this->userRepository->existByEmail($email)) {
             throw new UserAlreadyExistsException();
         }
 
-        $user = new User()
-            ->setEmail($request->email)
-            ->setRoles(['ROLE_USER']);
+        $hasher = $this->passwordHasherFactory->getPasswordHasher(User::class);
+        $passwordHash = $hasher->hash($request->password);
 
-        $passwordHash = $this->passwordHasher->hashPassword($user, $request->password);
-        $user->setPassword($passwordHash);
+        $user = User::createCustomer($email, $passwordHash);
 
         $this->userRepository->saveAndCommit($user);
 

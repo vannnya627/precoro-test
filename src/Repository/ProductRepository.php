@@ -25,4 +25,12 @@ final class ProductRepository extends ServiceEntityRepository implements Product
     {
         return $this->find($productId);
     }
+
+    /**
+     * @return list<Product>
+     */
+    public function findProducts(): array
+    {
+        return $this->findAll();
+    }
 }
