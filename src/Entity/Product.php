@@ -85,18 +85,42 @@ final class Product
         return $product;
     }
 
-    public function changeName(string $newName): void
+    private function changeName(string $newName): void
     {
+        if (strlen($newName) > 255) {
+            throw new \InvalidArgumentException("Нове ім'я для товару має бути не більше 255 символів");
+        }
         $this->name = $newName;
     }
 
-    public function changePrice(int $newPrice): void
+    private function changePrice(int $newPrice): void
     {
+        if ($newPrice < 0) {
+            throw new \InvalidArgumentException('Нова ціна не може бути менша 0');
+        }
         $this->price = $newPrice;
     }
 
-    public function changeDescription(string $newDescription): void
+    private function changeDescription(string $newDescription): void
     {
+        if (strlen($newDescription) > 5000) {
+            throw new \InvalidArgumentException('Новий опис для товару має бути не більше 5000 символів');
+        }
         $this->description = $newDescription;
+    }
+
+    public function update(?string $newName, ?string $newDescription, ?int $newPrice): void
+    {
+        if (null !== $newName) {
+            $this->changeName($newName);
+        }
+
+        if (null !== $newPrice) {
+            $this->changePrice($newPrice);
+        }
+
+        if (null !== $newDescription) {
+            $this->changeDescription($newDescription);
+        }
     }
 }

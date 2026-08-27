@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Service;
 
-use App\Entity\CartItem;
+use App\Entity\Cart;
 use App\Entity\Order;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Exception\EmptyCartException;
-use App\Repository\Interface\CartItemRepositoryInterface;
+use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\OrderRepositoryInterface;
 use App\Service\OrderService;
 use App\Tests\AbstractTestCase;
@@ -20,14 +20,14 @@ use PHPUnit\Framework\MockObject\MockObject;
 class OrderServiceTest extends AbstractTestCase
 {
     private OrderRepositoryInterface|MockObject $orderRepository;
-    private CartItemRepositoryInterface|MockObject $cartItemRepository;
+    private CartRepositoryInterface|MockObject $cartRepository;
     private OrderService $orderService;
 
     protected function setUp(): void
     {
         $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
-        $this->cartItemRepository = $this->createMock(CartItemRepositoryInterface::class);
-        $this->orderService = new OrderService($this->orderRepository, $this->cartItemRepository);
+        $this->cartRepository = $this->createMock(CartRepositoryInterface::class);
+        $this->orderService = new OrderService($this->orderRepository, $this->cartRepository);
     }
 
     /**
@@ -42,12 +42,12 @@ class OrderServiceTest extends AbstractTestCase
 
         $product = $this->createProduct();
 
-        $cartItem = CartItem::create($cart, $product, 2);
+        $cart->addItem($product, 2);
 
-        $this->cartItemRepository->expects($this->once())
-            ->method('findWithProducts')
+        $this->cartRepository->expects($this->once())
+            ->method('findCartWithItemsAndProducts')
             ->with($user)
-            ->willReturn([$cartItem]);
+            ->willReturn($cart);
 
         $this->orderRepository->expects($this->once())
             ->method('save')
@@ -59,9 +59,13 @@ class OrderServiceTest extends AbstractTestCase
                 $this->setEntityId($savedOrder, 99);
             });
 
-        $this->cartItemRepository->expects($this->once())
-            ->method('remove')
-            ->with($cartItem);
+        $this->cartRepository->expects($this->once())
+            ->method('save')
+            ->willReturnCallback(function (Cart $savedCart) use ($user) {
+                $this->assertSame($user, $savedCart->getUser());
+
+                $this->assertCount(0, $savedCart->getCartItems());
+            });
 
         $this->orderRepository->expects($this->once())
             ->method('commit');
@@ -82,32 +86,20 @@ class OrderServiceTest extends AbstractTestCase
     {
         $user = $this->createUser();
 
-        $this->cartItemRepository->expects($this->once())
-            ->method('findWithProducts')
+        $cart = $user->getCartOrCreate();
+        $this->cartRepository->expects($this->once())
+            ->method('findCartWithItemsAndProducts')
             ->with($user)
-            ->willReturn([]);
-
-        $this->cartItemRepository->expects($this->never())
-            ->method('remove');
+            ->willReturn($cart);
 
         $this->orderRepository->expects($this->never())
             ->method('save');
 
+        $this->cartRepository->expects($this->never())
+            ->method('save');
+
         $this->orderRepository->expects($this->never())
             ->method('commit');
-
-        $this->expectException(EmptyCartException::class);
-        $this->orderService->create($user);
-    }
-
-    /**
-     * @throws \ReflectionException
-     * @throws \Throwable
-     */
-    public function testCreateWhenCartIsEmptyThrowsException(): void
-    {
-        $user = $this->createUser();
-        $cart = $user->getCartOrCreate();
 
         $this->expectException(EmptyCartException::class);
         $this->orderService->create($user);
@@ -124,12 +116,12 @@ class OrderServiceTest extends AbstractTestCase
 
         $cart = $user->getCartOrCreate();
 
-        $cartItem = CartItem::create($cart, $product, 2);
-
         $order = Order::create($user);
         $this->setEntityId($order, 10);
 
-        $orderItem = $order->consumeCartItem($cartItem);
+        $cart->addItem($product, 2);
+
+        $order->addItemsFromCart($cart->getCartItems());
 
         $this->orderRepository->expects($this->once())
             ->method('findAllByUserIdWithProduct')

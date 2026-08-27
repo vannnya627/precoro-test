@@ -200,6 +200,27 @@ class AuthControllerTest extends AbstractWebTestCase
         $this->assertResponseStatusCodeSame(401);
     }
 
+    public function testHttpExceptionListenerTest(): void
+    {
+        $client = static::createClient();
+        $badUri = '/api/v1/auth/fake-route';
+        $payload = [
+            'email' => 'not_exist@test.com',
+            'password' => 'password',
+        ];
+
+        $client->request(
+            'POST',
+            $badUri,
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode($payload)
+        );
+
+        $this->assertResponseStatusCodeSame(404);
+    }
+
     private function createUser(ObjectManager $em): void
     {
         $passwordHasherFactory = static::getContainer()->get(PasswordHasherFactoryInterface::class);

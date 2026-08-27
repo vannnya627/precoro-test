@@ -80,20 +80,18 @@ final class Cart
     }
 
     /**
-     * @return array<int, CartItem>
+     * @return Collection<int, CartItem>
      */
-    public function getCartItems(): array
+    public function getCartItems(): Collection
     {
-        return $this->cartItems->toArray();
+        return $this->cartItems;
     }
 
-    public function addCartItem(CartItem $cartItem): static
+    private function addCartItem(CartItem $cartItem): void
     {
         if (!$this->cartItems->contains($cartItem)) {
             $this->cartItems->add($cartItem);
         }
-
-        return $this;
     }
 
     public function removeCartItem(CartItem $cartItem): static
@@ -101,5 +99,40 @@ final class Cart
         $this->cartItems->removeElement($cartItem);
 
         return $this;
+    }
+
+    private function getItemForProduct(Product $product): ?CartItem
+    {
+        foreach ($this->cartItems as $item) {
+            if ($item->getProduct() === $product) {
+                return $item;
+            }
+        }
+
+        return null;
+    }
+
+    public function addItem(Product $product, int $quantity): static
+    {
+        if ($quantity <= 0) {
+            throw new \InvalidArgumentException('Кількість не може дорівнювати нулю');
+        }
+
+        $existingItem = $this->getItemForProduct($product);
+
+        if (null !== $existingItem) {
+            $existingItem->addQuantity($quantity);
+        } else {
+            $newItem = CartItem::create($this, $product, $quantity);
+
+            $this->addCartItem($newItem);
+        }
+
+        return $this;
+    }
+
+    public function clear(): void
+    {
+        $this->cartItems->clear();
     }
 }

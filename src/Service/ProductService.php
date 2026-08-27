@@ -8,7 +8,6 @@ use App\DTO\Request\ProductRequestDTO;
 use App\DTO\Request\UpdateProductRequestDTO;
 use App\DTO\Response\ProductResponseDTO;
 use App\Entity\Product;
-use App\Exception\ProductNotFoundException;
 use App\Repository\Interface\ProductRepositoryInterface;
 use App\Service\Interface\ProductServiceInterface;
 
@@ -21,10 +20,7 @@ final readonly class ProductService implements ProductServiceInterface
 
     public function getOne(int $productId): ProductResponseDTO
     {
-        $product = $this->productRepository->findById($productId);
-        if (null === $product) {
-            throw new ProductNotFoundException();
-        }
+        $product = $this->productRepository->getById($productId);
 
         return ProductResponseDTO::create($product);
     }
@@ -55,36 +51,17 @@ final readonly class ProductService implements ProductServiceInterface
      */
     public function update(int $productId, UpdateProductRequestDTO $request): ProductResponseDTO
     {
-        $product = $this->productRepository->findById($productId);
-
-        if (null === $product) {
-            throw new ProductNotFoundException();
-        }
-        if (null !== $request->name) {
-            $product->changeName($request->name);
-        }
-        if (null !== $request->price) {
-            $product->changePrice($request->price);
-        }
-        if (null !== $request->description) {
-            $product->changeDescription($request->description);
-        }
+        $product = $this->productRepository->getById($productId);
+        $product->update($request->name, $request->description, $request->price);
 
         $this->productRepository->saveAndCommit($product);
 
         return ProductResponseDTO::create($product);
     }
 
-    /**
-     * @throws \Throwable
-     */
     public function delete(int $productId): void
     {
-        $product = $this->productRepository->findById($productId);
-
-        if (null === $product) {
-            throw new ProductNotFoundException();
-        }
+        $product = $this->productRepository->getById($productId);
 
         $this->productRepository->removeAndCommit($product);
     }

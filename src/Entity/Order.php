@@ -118,23 +118,24 @@ final class Order
         }
     }
 
-    public function consumeCartItem(CartItem $cartItem): OrderItem
-    {
-        $orderItem = OrderItem::create($this, $cartItem);
-
-        if (!$this->orderItems->contains($orderItem)) {
-            $this->orderItems->add($orderItem);
-            $this->recalculateTotalPrice();
-        }
-
-        return $orderItem;
-    }
-
     public static function create(User $user): static
     {
         $order = new static();
         $order->user = $user;
 
         return $order;
+    }
+
+    /**
+     * @param Collection<int, CartItem> $cartItems
+     */
+    public function addItemsFromCart(Collection $cartItems): void
+    {
+        foreach ($cartItems as $cartItem) {
+            $orderItem = OrderItem::create($this, $cartItem);
+
+            $this->orderItems->add($orderItem);
+        }
+        $this->recalculateTotalPrice();
     }
 }

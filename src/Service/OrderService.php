@@ -10,7 +10,7 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\User;
 use App\Exception\EmptyCartException;
-use App\Repository\Interface\CartItemRepositoryInterface;
+use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\OrderRepositoryInterface;
 use App\Service\Interface\OrderServiceInterface;
 
@@ -18,7 +18,7 @@ final readonly class OrderService implements OrderServiceInterface
 {
     public function __construct(
         private OrderRepositoryInterface $orderRepository,
-        private CartItemRepositoryInterface $cartItemRepository,
+        private CartRepositoryInterface $cartRepository,
     ) {
     }
 
@@ -27,27 +27,26 @@ final readonly class OrderService implements OrderServiceInterface
      */
     public function create(User $user): OrderResponseDTO
     {
-        $cartItems = $this->cartItemRepository->findWithProducts($user);
-        if (empty($cartItems)) {
+        $cart = $this->cartRepository->findCartWithItemsAndProducts($user);
+
+        if (null === $cart || $cart->getCartItems()->isEmpty()) {
             throw new EmptyCartException();
         }
-
         $order = Order::create($user);
+        $order->addItemsFromCart($cart->getCartItems());
 
-        $orderItems = [];
-        foreach ($cartItems as $cartItem) {
-            $orderItem = $order->consumeCartItem($cartItem);
-            $orderItems[] = $orderItem;
-
-            $this->cartItemRepository->remove($cartItem);
-        }
+        $cart->clear();
 
         $this->orderRepository->save($order);
+        $this->cartRepository->save($cart);
+
         $this->orderRepository->commit();
 
-        $orderItemsDTO = array_map(function (OrderItem $orderItem): OrderItemResponseDTO {
-            return OrderItemResponseDTO::create($orderItem);
-        }, $orderItems);
+        $orderItemsDTO = array_values(
+            $order->getOrderItems()->map(function (OrderItem $orderItem): OrderItemResponseDTO {
+                return OrderItemResponseDTO::create($orderItem);
+            })->toArray()
+        );
 
         return $this->mapToOrderDTO($order, $orderItemsDTO);
     }

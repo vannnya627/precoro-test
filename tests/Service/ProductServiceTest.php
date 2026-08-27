@@ -36,7 +36,7 @@ class ProductServiceTest extends AbstractTestCase
         $productId = $product->getId();
 
         $this->productRepository->expects($this->once())
-            ->method('findById')
+            ->method('getById')
             ->with($productId)
             ->willReturn($product);
 
@@ -49,9 +49,9 @@ class ProductServiceTest extends AbstractTestCase
     {
         $productId = 1;
         $this->productRepository->expects($this->once())
-            ->method('findById')
+            ->method('getById')
             ->with($productId)
-            ->willReturn(null);
+            ->willThrowException(new ProductNotFoundException());
 
         $this->expectException(ProductNotFoundException::class);
         $this->productService->getOne($productId);
@@ -139,7 +139,7 @@ class ProductServiceTest extends AbstractTestCase
         $productId = $product->getId();
 
         $this->productRepository->expects($this->once())
-            ->method('findById')
+            ->method('getById')
             ->with($productId)
             ->willReturn($product);
 
@@ -167,9 +167,9 @@ class ProductServiceTest extends AbstractTestCase
         $request = new UpdateProductRequestDTO(name: 'test', price: 100);
 
         $this->productRepository->expects($this->once())
-            ->method('findById')
+            ->method('getById')
             ->with($productId)
-            ->willReturn(null);
+            ->willThrowException(new ProductNotFoundException());
 
         $this->productRepository->expects($this->never())->method('saveAndCommit');
 
@@ -188,7 +188,7 @@ class ProductServiceTest extends AbstractTestCase
         $productId = $product->getId();
 
         $this->productRepository->expects($this->once())
-            ->method('findById')
+            ->method('getById')
             ->with($productId)
             ->willReturn($product);
 
@@ -208,9 +208,9 @@ class ProductServiceTest extends AbstractTestCase
         $productId = 1;
 
         $this->productRepository->expects($this->once())
-            ->method('findById')
+            ->method('getById')
             ->with($productId)
-            ->willReturn(null);
+            ->willThrowException(new ProductNotFoundException());
 
         $this->productRepository->expects($this->never())
             ->method('removeAndCommit');

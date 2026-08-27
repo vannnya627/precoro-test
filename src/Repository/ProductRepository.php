@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Product;
+use App\Exception\ProductNotFoundException;
 use App\Repository\Interface\ProductRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -21,9 +22,9 @@ final class ProductRepository extends ServiceEntityRepository implements Product
         parent::__construct($registry, Product::class);
     }
 
-    public function findById(int $productId): ?Product
+    public function getById(int $productId): Product
     {
-        return $this->find($productId);
+        return $this->find($productId) ?? throw new ProductNotFoundException();
     }
 
     /**

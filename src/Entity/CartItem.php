@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Repository\CartItemRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: CartItemRepository::class)]
+#[ORM\Entity]
 final class CartItem
 {
     #[ORM\Id]

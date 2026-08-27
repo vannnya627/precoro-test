@@ -7,11 +7,9 @@ namespace App\Tests\Service;
 use App\DTO\Request\AddItemRequestDTO;
 use App\DTO\Response\CartItemResponseDTO;
 use App\Entity\Cart;
-use App\Entity\CartItem;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Exception\ProductNotFoundException;
-use App\Repository\Interface\CartItemRepositoryInterface;
 use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\ProductRepositoryInterface;
 use App\Service\CartService;
@@ -24,15 +22,13 @@ class CartServiceTest extends AbstractTestCase
 {
     private CartRepositoryInterface|MockObject $cartRepository;
     private ProductRepositoryInterface|MockObject $productRepository;
-    private CartItemRepositoryInterface|MockObject $cartItemRepository;
     private CartService $cartService;
 
     protected function setUp(): void
     {
         $this->cartRepository = $this->createMock(CartRepositoryInterface::class);
         $this->productRepository = $this->createMock(ProductRepositoryInterface::class);
-        $this->cartItemRepository = $this->createMock(CartItemRepositoryInterface::class);
-        $this->cartService = new CartService($this->cartRepository, $this->productRepository, $this->cartItemRepository);
+        $this->cartService = new CartService($this->cartRepository, $this->productRepository);
     }
 
     /**
@@ -54,16 +50,11 @@ class CartServiceTest extends AbstractTestCase
         $productId = $product->getId();
 
         $this->productRepository->expects($this->once())
-            ->method('findById')
+            ->method('getById')
             ->with($productId)
             ->willReturn($product);
 
-        $cartItem = CartItem::create($cart, $product, $request->quantity);
-
-        $this->cartItemRepository->expects($this->once())
-            ->method('findByCartAndProduct')
-            ->with($cart, $product)
-            ->willReturn($cartItem);
+        $cart->addItem($product, 1);
 
         $this->cartRepository->expects($this->once())
             ->method('saveAndCommit')
@@ -71,7 +62,9 @@ class CartServiceTest extends AbstractTestCase
 
         $this->cartService->addItem($request, $user);
 
-        $this->assertEquals(2, $cartItem->getQuantity());
+        $updatedItem = $cart->getCartItems()->first();
+
+        $this->assertEquals(2, $updatedItem->getQuantity());
     }
 
     /**
@@ -89,12 +82,9 @@ class CartServiceTest extends AbstractTestCase
         $productId = $request->productId;
 
         $this->productRepository->expects($this->once())
-            ->method('findById')
+            ->method('getById')
             ->with($productId)
-            ->willReturn(null);
-
-        $this->cartItemRepository->expects($this->never())
-            ->method('findByCartAndProduct');
+            ->willThrowException(new ProductNotFoundException());
 
         $this->cartRepository->expects($this->never())
             ->method('saveAndCommit');
@@ -107,7 +97,7 @@ class CartServiceTest extends AbstractTestCase
      * @throws \ReflectionException
      * @throws \Throwable
      */
-    public function testAddItemWhenCartItemRepositoryReturnNull(): void
+    public function testAddCompletelyNewItemToCart(): void
     {
         $request = new AddItemRequestDTO(
             productId: 1,
@@ -122,14 +112,9 @@ class CartServiceTest extends AbstractTestCase
         $productId = $product->getId();
 
         $this->productRepository->expects($this->once())
-            ->method('findById')
+            ->method('getById')
             ->with($productId)
             ->willReturn($product);
-
-        $this->cartItemRepository->expects($this->once())
-            ->method('findByCartAndProduct')
-            ->with($cart, $product)
-            ->willReturn(null);
 
         $this->cartRepository->expects($this->once())
             ->method('saveAndCommit')
@@ -139,7 +124,7 @@ class CartServiceTest extends AbstractTestCase
 
         $this->assertCount(1, $cart->getCartItems());
 
-        $addedItem = $cart->getCartItems()[0];
+        $addedItem = $cart->getCartItems()->first();
 
         $this->assertEquals(1, $addedItem->getQuantity());
         $this->assertSame($product, $addedItem->getProduct());
@@ -159,18 +144,8 @@ class CartServiceTest extends AbstractTestCase
         $product = $this->createProduct();
 
         $this->productRepository->expects($this->once())
-            ->method('findById')
+            ->method('getById')
             ->willReturn($product);
-
-        $this->cartItemRepository->expects($this->once())
-            ->method('findByCartAndProduct')
-            ->with(
-                $this->callback(function (Cart $savedCart) use ($user) {
-                    return $savedCart->getUser() === $user;
-                }),
-                $this->identicalTo($product)
-            )
-            ->willReturn(null);
 
         $this->cartRepository->expects($this->once())
             ->method('saveAndCommit')
@@ -195,18 +170,18 @@ class CartServiceTest extends AbstractTestCase
 
         $product = $this->createProduct();
 
-        $cartItem = CartItem::create($cart, $product, 1);
+        $cart->addItem($product, 1);
 
-        $this->cartItemRepository->expects($this->once())
-            ->method('findWithProducts')
+        $this->cartRepository->expects($this->once())
+            ->method('findCartWithItemsAndProducts')
             ->with($user)
-            ->willReturn([$cartItem]);
+            ->willReturn($cart);
 
         $expectedResponse = [
             new CartItemResponseDTO(
                 productId: $product->getId(),
                 productName: $product->getName(),
-                quantity: $cartItem->getQuantity(),
+                quantity: $cart->getCartItems()->first()->getQuantity(),
             ),
         ];
 
@@ -217,13 +192,14 @@ class CartServiceTest extends AbstractTestCase
     /**
      * @throws \ReflectionException
      */
-    public function testGetListWhenCartIsEmpty(): void
+    public function testGetListWhenCartIsNullOrEmpty(): void
     {
         $user = $this->createUser();
-        $this->cartItemRepository->expects($this->once())
-            ->method('findWithProducts')
+        $cart = $user->getCartOrCreate();
+        $this->cartRepository->expects($this->once())
+            ->method('findCartWithItemsAndProducts')
             ->with($user)
-            ->willReturn([]);
+            ->willReturn($cart);
 
         $response = $this->cartService->getList($user);
 
