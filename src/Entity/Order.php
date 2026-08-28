@@ -114,7 +114,7 @@ final class Order
     {
         $this->totalPrice = 0;
         foreach ($this->orderItems as $item) {
-            $this->totalPrice += $item->getPrice() * $item->getQuantity();
+            $this->totalPrice += $item->price * $item->quantity;
         }
     }
 

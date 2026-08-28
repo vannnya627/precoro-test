@@ -19,10 +19,10 @@ final readonly class OrderItemResponseDTO
     public static function create(OrderItem $orderItem): self
     {
         return new self(
-            productId: $orderItem->getProduct()->getId(),
-            productName: $orderItem->getProduct()->getName(),
-            quantity: $orderItem->getQuantity(),
-            price: $orderItem->getPrice(),
+            productId: $orderItem->product->id,
+            productName: $orderItem->product->name,
+            quantity: $orderItem->quantity,
+            price: $orderItem->price,
         );
     }
 }

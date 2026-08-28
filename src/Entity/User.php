@@ -19,51 +19,48 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    public private(set) int $id;
 
     #[ORM\Column(length: 180)]
-    private string $email;
+    public private(set) string $email {
+        set(string $value) {
+            if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                throw new \InvalidArgumentException('Невалідний email');
+            }
+            $this->email = $value;
+        }
+    }
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    private array $roles = [];
+    public private(set) array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
-    private string $password;
+    public private(set) string $password;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    public private(set) ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
+    public private(set) ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
-    private ?Cart $cart = null;
+    public private(set) ?Cart $cart = null;
 
     /**
      * @var Collection<int, Order>
      */
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user')]
-    private Collection $orders;
+    public private(set) Collection $orders;
 
     private function __construct()
     {
         $this->orders = new ArrayCollection();
-    }
-
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
-    public function getEmail(): string
-    {
-        return $this->email;
     }
 
     /**
@@ -111,16 +108,6 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         // @deprecated, to be removed when upgrading to Symfony 8
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
@@ -132,19 +119,6 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAtValue(): void
     {
         $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    public function getCart(): ?Cart
-    {
-        return $this->cart;
-    }
-
-    /**
-     * @return Collection<int, Order>
-     */
-    public function getOrders(): Collection
-    {
-        return $this->orders;
     }
 
     public function addOrder(Order $order): static

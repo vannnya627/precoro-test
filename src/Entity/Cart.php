@@ -16,17 +16,17 @@ final class Cart
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    public private(set) int $id;
 
     #[ORM\OneToOne(inversedBy: 'cart', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private User $user;
+    public private(set) User $user;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    public private(set) ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
+    public private(set) ?\DateTimeImmutable $updatedAt = null;
 
     /**
      * @var Collection<int, CartItem>
@@ -38,7 +38,7 @@ final class Cart
         fetch: 'EXTRA_LAZY',
         orphanRemoval: true
     )]
-    private Collection $cartItems;
+    public private(set) Collection $cartItems;
 
     private function __construct()
     {
@@ -53,26 +53,6 @@ final class Cart
         return $cart;
     }
 
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
-    public function getUser(): User
-    {
-        return $this->user;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
@@ -84,14 +64,6 @@ final class Cart
     public function setUpdatedAtValue(): void
     {
         $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    /**
-     * @return Collection<int, CartItem>
-     */
-    public function getCartItems(): Collection
-    {
-        return $this->cartItems;
     }
 
     private function addCartItem(CartItem $cartItem): void
@@ -111,7 +83,7 @@ final class Cart
     private function getItemForProduct(Product $product): ?CartItem
     {
         foreach ($this->cartItems as $item) {
-            if ($item->getProduct() === $product) {
+            if ($item->product === $product) {
                 return $item;
             }
         }

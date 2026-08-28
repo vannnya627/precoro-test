@@ -33,7 +33,7 @@ class ProductServiceTest extends AbstractTestCase
     public function testGetOne(): void
     {
         $product = $this->createProduct();
-        $productId = $product->getId();
+        $productId = $product->id;
 
         $this->productRepository->expects($this->once())
             ->method('getById')
@@ -109,9 +109,9 @@ class ProductServiceTest extends AbstractTestCase
         $this->productRepository->expects($this->once())
             ->method('saveAndCommit')
             ->willReturnCallback(function (Product $savedProduct) use ($request) {
-                $this->assertEquals($request->name, $savedProduct->getName());
-                $this->assertEquals($request->description, $savedProduct->getDescription());
-                $this->assertEquals($request->price, $savedProduct->getPrice());
+                $this->assertEquals($request->name, $savedProduct->name);
+                $this->assertEquals($request->description, $savedProduct->description);
+                $this->assertEquals($request->price, $savedProduct->price);
 
                 $this->setEntityId($savedProduct, 1);
             });
@@ -136,7 +136,7 @@ class ProductServiceTest extends AbstractTestCase
         );
 
         $product = $this->createProduct();
-        $productId = $product->getId();
+        $productId = $product->id;
 
         $this->productRepository->expects($this->once())
             ->method('getById')
@@ -146,15 +146,15 @@ class ProductServiceTest extends AbstractTestCase
         $this->productRepository->expects($this->once())
             ->method('saveAndCommit')
             ->willReturnCallback(function (Product $savedProduct) use ($request) {
-                $this->assertEquals($request->name, $savedProduct->getName());
-                $this->assertEquals($request->price, $savedProduct->getPrice());
+                $this->assertEquals($request->name, $savedProduct->name);
+                $this->assertEquals($request->price, $savedProduct->price);
 
                 $this->setEntityId($savedProduct, 1);
             });
         $response = $this->productService->update($productId, $request);
         $this->assertEquals(1, $response->id);
         $this->assertEquals($request->name, $response->name);
-        $this->assertEquals($product->getDescription(), $response->description);
+        $this->assertEquals($product->description, $response->description);
         $this->assertEquals($request->price, $response->price);
     }
 
@@ -185,7 +185,7 @@ class ProductServiceTest extends AbstractTestCase
     public function testDelete(): void
     {
         $product = $this->createProduct();
-        $productId = $product->getId();
+        $productId = $product->id;
 
         $this->productRepository->expects($this->once())
             ->method('getById')

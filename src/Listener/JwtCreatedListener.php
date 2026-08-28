@@ -18,7 +18,7 @@ final readonly class JwtCreatedListener
         }
         $payload = $event->getData();
 
-        $payload['id'] = $user->getId();
+        $payload['id'] = $user->id;
 
         $event->setData($payload);
     }

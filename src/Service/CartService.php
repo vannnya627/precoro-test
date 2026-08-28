@@ -25,7 +25,7 @@ final readonly class CartService implements CartServiceInterface
     {
         $product = $this->productRepository->getById($request->productId);
 
-        $cart = $user->getCart();
+        $cart = $user->cart;
 
         if (null === $cart) {
             $cart = Cart::create($user);
@@ -41,18 +41,18 @@ final readonly class CartService implements CartServiceInterface
     {
         $cart = $this->cartRepository->findCartWithItemsAndProducts($user);
 
-        if (null === $cart || $cart->getCartItems()->isEmpty()) {
+        if (null === $cart || $cart->cartItems->isEmpty()) {
             return [];
         }
 
         return array_values(
-            $cart->getCartItems()->map(function (CartItem $item): CartItemResponseDTO {
-                $product = $item->getProduct();
+            $cart->cartItems->map(function (CartItem $item): CartItemResponseDTO {
+                $product = $item->product;
 
                 return new CartItemResponseDTO(
-                    productId: $product->getId(),
-                    productName: $product->getName(),
-                    quantity: $item->getQuantity(),
+                    productId: $product->id,
+                    productName: $product->name,
+                    quantity: $item->quantity,
                 );
             })->toArray()
         );

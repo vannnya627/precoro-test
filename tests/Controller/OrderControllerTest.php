@@ -23,7 +23,7 @@ class OrderControllerTest extends AbstractWebTestCase
         $product = $this->createProduct($em, 'Phone', 500);
         $token = $this->getAuthToken($client);
 
-        $this->addProductToCart($client, $token, $product->getId(), 2);
+        $this->addProductToCart($client, $token, $product->id, 2);
 
         $client->request(
             'POST',
@@ -46,7 +46,7 @@ class OrderControllerTest extends AbstractWebTestCase
 
         $this->assertArrayHasKey('orderItems', $responseContent);
         $this->assertCount(1, $responseContent['orderItems']);
-        $this->assertEquals($product->getId(), $responseContent['orderItems'][0]['productId']);
+        $this->assertEquals($product->id, $responseContent['orderItems'][0]['productId']);
     }
 
     public function testCreateOrderEmptyCart(): void
@@ -93,7 +93,7 @@ class OrderControllerTest extends AbstractWebTestCase
         $product = $this->createProduct($em, 'Laptop', 2000);
         $token = $this->getAuthToken($client);
 
-        $this->addProductToCart($client, $token, $product->getId(), 1);
+        $this->addProductToCart($client, $token, $product->id, 1);
         $client->request(
             'POST',
             '/api/v1/order',
@@ -102,7 +102,7 @@ class OrderControllerTest extends AbstractWebTestCase
             ['HTTP_AUTHORIZATION' => 'Bearer '.$token]
         );
 
-        $this->addProductToCart($client, $token, $product->getId(), 2);
+        $this->addProductToCart($client, $token, $product->id, 2);
         $client->request(
             'POST',
             '/api/v1/order',

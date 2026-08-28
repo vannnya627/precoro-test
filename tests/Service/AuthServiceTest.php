@@ -61,7 +61,7 @@ class AuthServiceTest extends AbstractTestCase
         $this->userRepository->expects($this->once())
             ->method('saveAndCommit')
             ->willReturnCallback(function (User $savedUser) use ($request) {
-                $this->assertEquals($request->email, $savedUser->getEmail());
+                $this->assertEquals($request->email, $savedUser->email);
 
                 $this->setEntityId($savedUser, 1);
             });
@@ -70,13 +70,13 @@ class AuthServiceTest extends AbstractTestCase
         $this->JWTTokenManager->expects($this->once())
             ->method('create')
             ->with($this->callback(function (User $createdUser) {
-                return 'test@test.com' === $createdUser->getEmail();
+                return 'test@test.com' === $createdUser->email;
             }))
             ->willReturn($token);
 
         $expectedResponse = new SignUpResponseDTO(
-            userId: $user->getId(),
-            email: $user->getEmail(),
+            userId: $user->id,
+            email: $user->email,
             token: $token
         );
         $result = $this->authService->signUp($request);

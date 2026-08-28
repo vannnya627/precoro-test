@@ -42,8 +42,8 @@ final readonly class AuthService implements AuthServiceInterface
         $token = $this->JWTTokenManager->create($user);
 
         return new SignUpResponseDTO(
-            userId: $user->getId(),
-            email: $user->getEmail(),
+            userId: $user->id,
+            email: $user->email,
             token: $token
         );
     }

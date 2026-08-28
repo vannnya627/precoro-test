@@ -24,7 +24,7 @@ class CartControllerTest extends AbstractWebTestCase
         $token = $this->getAuthToken($client);
 
         $payload = [
-            'productId' => $product->getId(),
+            'productId' => $product->id,
             'quantity' => 2,
         ];
 
@@ -114,7 +114,7 @@ class CartControllerTest extends AbstractWebTestCase
                 'HTTP_AUTHORIZATION' => 'Bearer '.$token,
             ],
             json_encode([
-                'productId' => $product->getId(),
+                'productId' => $product->id,
                 'quantity' => 3,
             ])
         );
@@ -137,7 +137,7 @@ class CartControllerTest extends AbstractWebTestCase
         $this->assertCount(1, $responseContent['data']);
 
         $item = $responseContent['data'][0];
-        $this->assertEquals($product->getId(), $item['productId']);
+        $this->assertEquals($product->id, $item['productId']);
         $this->assertEquals(3, $item['quantity']);
     }
 

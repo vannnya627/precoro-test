@@ -19,7 +19,7 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $client->request(
             'GET',
-            '/api/v1/product/'.$product->getId()
+            '/api/v1/product/'.$product->id
         );
 
         $this->assertResponseIsSuccessful();
@@ -28,9 +28,9 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $this->assertIsArray($responseContent);
         $this->assertArrayHasKey('id', $responseContent);
-        $this->assertEquals($product->getId(), $responseContent['id']);
-        $this->assertEquals($product->getName(), $responseContent['name']);
-        $this->assertEquals($product->getPrice(), $responseContent['price']);
+        $this->assertEquals($product->id, $responseContent['id']);
+        $this->assertEquals($product->name, $responseContent['name']);
+        $this->assertEquals($product->price, $responseContent['price']);
     }
 
     public function testGetProductNotFound(): void
@@ -141,7 +141,7 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $client->request(
             'PATCH',
-            '/api/v1/product/'.$product->getId(),
+            '/api/v1/product/'.$product->id,
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
@@ -157,9 +157,9 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $em->clear();
 
-        $productInDb = $em->getRepository(Product::class)->find($product->getId());
-        $this->assertEquals('Updated Name', $productInDb->getName());
-        $this->assertEquals(999, $productInDb->getPrice());
+        $productInDb = $em->getRepository(Product::class)->find($product->id);
+        $this->assertEquals('Updated Name', $productInDb->name);
+        $this->assertEquals(999, $productInDb->price);
     }
 
     public function testUpdateProductNotFound(): void
@@ -186,7 +186,7 @@ class ProductControllerTest extends AbstractWebTestCase
         $em = static::getContainer()->get('doctrine')->getManager();
 
         $product = $this->createProduct($em);
-        $productId = $product->getId();
+        $productId = $product->id;
 
         $client->request(
             'DELETE',

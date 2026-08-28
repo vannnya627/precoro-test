@@ -29,11 +29,11 @@ final readonly class OrderService implements OrderServiceInterface
     {
         $cart = $this->cartRepository->findCartWithItemsAndProducts($user);
 
-        if (null === $cart || $cart->getCartItems()->isEmpty()) {
+        if (null === $cart || $cart->cartItems->isEmpty()) {
             throw new EmptyCartException();
         }
         $order = Order::create($user);
-        $order->addItemsFromCart($cart->getCartItems());
+        $order->addItemsFromCart($cart->cartItems);
 
         $cart->clear();
 
@@ -56,7 +56,7 @@ final readonly class OrderService implements OrderServiceInterface
      */
     public function getList(User $user): array
     {
-        $orders = $this->orderRepository->findAllByUserIdWithProduct($user->getId());
+        $orders = $this->orderRepository->findAllByUserIdWithProduct($user->id);
 
         $result = [];
         foreach ($orders as $order) {

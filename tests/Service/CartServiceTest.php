@@ -48,7 +48,7 @@ class CartServiceTest extends AbstractTestCase
         $user->addCart($cart);
 
         $product = $this->createProduct();
-        $productId = $product->getId();
+        $productId = $product->id;
 
         $this->productRepository->expects($this->once())
             ->method('getById')
@@ -63,9 +63,9 @@ class CartServiceTest extends AbstractTestCase
 
         $this->cartService->addItem($request, $user);
 
-        $updatedItem = $cart->getCartItems()->first();
+        $updatedItem = $cart->cartItems->first();
 
-        $this->assertEquals(2, $updatedItem->getQuantity());
+        $this->assertEquals(2, $updatedItem->quantity);
     }
 
     /**
@@ -111,7 +111,7 @@ class CartServiceTest extends AbstractTestCase
         $user->addCart($cart);
 
         $product = $this->createProduct();
-        $productId = $product->getId();
+        $productId = $product->id;
 
         $this->productRepository->expects($this->once())
             ->method('getById')
@@ -124,13 +124,13 @@ class CartServiceTest extends AbstractTestCase
 
         $this->cartService->addItem($request, $user);
 
-        $this->assertCount(1, $cart->getCartItems());
+        $this->assertCount(1, $cart->cartItems);
 
-        $addedItem = $cart->getCartItems()->first();
+        $addedItem = $cart->cartItems->first();
 
-        $this->assertEquals(1, $addedItem->getQuantity());
-        $this->assertSame($product, $addedItem->getProduct());
-        $this->assertSame($cart, $addedItem->getCart());
+        $this->assertEquals(1, $addedItem->quantity);
+        $this->assertSame($product, $addedItem->product);
+        $this->assertSame($cart, $addedItem->cart);
     }
 
     /**
@@ -152,13 +152,13 @@ class CartServiceTest extends AbstractTestCase
         $this->cartRepository->expects($this->once())
             ->method('saveAndCommit')
             ->with($this->callback(function (Cart $savedCart) use ($user) {
-                return $savedCart->getUser() === $user;
+                return $savedCart->user === $user;
             }));
 
         $this->cartService->addItem($request, $user);
 
-        $this->assertNotNull($user->getCart());
-        $this->assertCount(1, $user->getCart()->getCartItems());
+        $this->assertNotNull($user->cart);
+        $this->assertCount(1, $user->cart->cartItems);
     }
 
     /**
@@ -182,9 +182,9 @@ class CartServiceTest extends AbstractTestCase
 
         $expectedResponse = [
             new CartItemResponseDTO(
-                productId: $product->getId(),
-                productName: $product->getName(),
-                quantity: $cart->getCartItems()->first()->getQuantity(),
+                productId: $product->id,
+                productName: $product->name,
+                quantity: $cart->cartItems->first()->quantity,
             ),
         ];
 

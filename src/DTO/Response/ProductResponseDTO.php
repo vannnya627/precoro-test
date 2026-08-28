@@ -19,10 +19,10 @@ final class ProductResponseDTO
     public static function create(Product $product): self
     {
         return new self(
-            id: $product->getId(),
-            name: $product->getName(),
-            description: $product->getDescription(),
-            price: $product->getPrice(),
+            id: $product->id,
+            name: $product->name,
+            description: $product->description,
+            price: $product->price,
         );
     }
 }

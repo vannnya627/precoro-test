@@ -63,9 +63,9 @@ class OrderServiceTest extends AbstractTestCase
         $this->cartRepository->expects($this->once())
             ->method('save')
             ->willReturnCallback(function (Cart $savedCart) use ($user) {
-                $this->assertSame($user, $savedCart->getUser());
+                $this->assertSame($user, $savedCart->user);
 
-                $this->assertCount(0, $savedCart->getCartItems());
+                $this->assertCount(0, $savedCart->cartItems);
             });
 
         $this->orderRepository->expects($this->once())
@@ -124,11 +124,11 @@ class OrderServiceTest extends AbstractTestCase
 
         $cart->addItem($product, 2);
 
-        $order->addItemsFromCart($cart->getCartItems());
+        $order->addItemsFromCart($cart->cartItems);
 
         $this->orderRepository->expects($this->once())
             ->method('findAllByUserIdWithProduct')
-            ->with($user->getId())
+            ->with($user->id)
             ->willReturn([$order]);
 
         $response = $this->orderService->getList($user);
@@ -154,7 +154,7 @@ class OrderServiceTest extends AbstractTestCase
         $user = $this->createUser();
         $this->orderRepository->expects($this->once())
             ->method('findAllByUserIdWithProduct')
-            ->with($user->getId())
+            ->with($user->id)
             ->willReturn([]);
 
         $response = $this->orderService->getList($user);
