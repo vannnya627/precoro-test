@@ -25,6 +25,10 @@ final class CartItem
     #[ORM\Column(type: 'integer')]
     private int $quantity = 1;
 
+    private function __construct()
+    {
+    }
+
     public function getId(): int
     {
         return $this->id;
@@ -55,8 +59,16 @@ final class CartItem
         $cartItem = new static();
         $cartItem->cart = $cart;
         $cartItem->product = $product;
-        $cartItem->quantity = $quantity;
+        $cartItem->setQuantity($quantity);
 
         return $cartItem;
+    }
+
+    private function setQuantity(int $quantity): void
+    {
+        if ($quantity < 1) {
+            throw new \InvalidArgumentException('Кількість не може бути менша 1');
+        }
+        $this->quantity = $quantity;
     }
 }

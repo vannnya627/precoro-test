@@ -28,6 +28,10 @@ final class OrderItem
     #[ORM\Column(type: 'integer')]
     private int $price;
 
+    private function __construct()
+    {
+    }
+
     public function getId(): int
     {
         return $this->id;
@@ -58,9 +62,25 @@ final class OrderItem
         $orderItem = new static();
         $orderItem->order = $order;
         $orderItem->product = $cartItem->getProduct();
-        $orderItem->quantity = $cartItem->getQuantity();
-        $orderItem->price = $cartItem->getProduct()->getPrice();
+        $orderItem->setQuantity($cartItem->getQuantity());
+        $orderItem->setPrice($cartItem->getProduct()->getPrice());
 
         return $orderItem;
+    }
+
+    private function setPrice(int $price): void
+    {
+        if ($price < 0) {
+            throw new \InvalidArgumentException('Ціна не може бути менша 0');
+        }
+        $this->price = $price;
+    }
+
+    private function setQuantity(int $quantity): void
+    {
+        if ($quantity < 1) {
+            throw new \InvalidArgumentException('Кількість не може бути менша 1');
+        }
+        $this->quantity = $quantity;
     }
 }

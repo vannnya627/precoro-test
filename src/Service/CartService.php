@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\DTO\Request\AddItemRequestDTO;
 use App\DTO\Response\CartItemResponseDTO;
+use App\Entity\Cart;
 use App\Entity\CartItem;
 use App\Entity\User;
 use App\Repository\Interface\CartRepositoryInterface;
@@ -24,7 +25,12 @@ final readonly class CartService implements CartServiceInterface
     {
         $product = $this->productRepository->getById($request->productId);
 
-        $cart = $user->getCartOrCreate();
+        $cart = $user->getCart();
+
+        if (null === $cart) {
+            $cart = Cart::create($user);
+            $user->addCart($cart);
+        }
 
         $cart->addItem($product, $request->quantity);
 

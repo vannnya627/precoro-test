@@ -51,7 +51,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user')]
     private Collection $orders;
 
-    public function __construct()
+    private function __construct()
     {
         $this->orders = new ArrayCollection();
     }
@@ -163,15 +163,6 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCartOrCreate(): Cart
-    {
-        if (null === $this->cart) {
-            $this->cart = new Cart($this);
-        }
-
-        return $this->cart;
-    }
-
     public static function createCustomer(string $email, string $passwordHash): self
     {
         $user = new self();
@@ -180,5 +171,10 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         $user->password = $passwordHash;
 
         return $user;
+    }
+
+    public function addCart(Cart $cart): void
+    {
+        $this->cart = $cart;
     }
 }

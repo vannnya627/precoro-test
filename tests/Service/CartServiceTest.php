@@ -44,7 +44,8 @@ class CartServiceTest extends AbstractTestCase
 
         $user = $this->createUser();
 
-        $cart = $user->getCartOrCreate();
+        $cart = $this->createCart($user);
+        $user->addCart($cart);
 
         $product = $this->createProduct();
         $productId = $product->getId();
@@ -106,7 +107,8 @@ class CartServiceTest extends AbstractTestCase
 
         $user = $this->createUser();
 
-        $cart = $user->getCartOrCreate();
+        $cart = $this->createCart($user);
+        $user->addCart($cart);
 
         $product = $this->createProduct();
         $productId = $product->getId();
@@ -166,7 +168,8 @@ class CartServiceTest extends AbstractTestCase
     {
         $user = $this->createUser();
 
-        $cart = $user->getCartOrCreate();
+        $cart = $this->createCart($user);
+        $user->addCart($cart);
 
         $product = $this->createProduct();
 
@@ -195,7 +198,10 @@ class CartServiceTest extends AbstractTestCase
     public function testGetListWhenCartIsNullOrEmpty(): void
     {
         $user = $this->createUser();
-        $cart = $user->getCartOrCreate();
+
+        $cart = $this->createCart($user);
+        $user->addCart($cart);
+
         $this->cartRepository->expects($this->once())
             ->method('findCartWithItemsAndProducts')
             ->with($user)
@@ -228,5 +234,17 @@ class CartServiceTest extends AbstractTestCase
         $this->setEntityId($product, $productId);
 
         return $product;
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    private function createCart(User $user): Cart
+    {
+        $cartId = 1;
+        $cart = Cart::create($user);
+        $this->setEntityId($cart, $cartId);
+
+        return $cart;
     }
 }

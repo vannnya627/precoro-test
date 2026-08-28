@@ -40,10 +40,17 @@ final class Cart
     )]
     private Collection $cartItems;
 
-    public function __construct(User $user)
+    private function __construct()
     {
-        $this->user = $user;
         $this->cartItems = new ArrayCollection();
+    }
+
+    public static function create(User $user): static
+    {
+        $cart = new self();
+        $cart->user = $user;
+
+        return $cart;
     }
 
     public function getId(): int

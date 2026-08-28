@@ -38,7 +38,8 @@ class OrderServiceTest extends AbstractTestCase
     {
         $user = $this->createUser();
 
-        $cart = $user->getCartOrCreate();
+        $cart = $this->createCart($user);
+        $user->addCart($cart);
 
         $product = $this->createProduct();
 
@@ -86,7 +87,8 @@ class OrderServiceTest extends AbstractTestCase
     {
         $user = $this->createUser();
 
-        $cart = $user->getCartOrCreate();
+        $cart = $this->createCart($user);
+        $user->addCart($cart);
         $this->cartRepository->expects($this->once())
             ->method('findCartWithItemsAndProducts')
             ->with($user)
@@ -114,7 +116,8 @@ class OrderServiceTest extends AbstractTestCase
 
         $product = $this->createProduct();
 
-        $cart = $user->getCartOrCreate();
+        $cart = $this->createCart($user);
+        $user->addCart($cart);
 
         $order = Order::create($user);
         $this->setEntityId($order, 10);
@@ -181,5 +184,17 @@ class OrderServiceTest extends AbstractTestCase
         $this->setEntityId($product, $productId);
 
         return $product;
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    private function createCart(User $user): Cart
+    {
+        $cartId = 1;
+        $cart = Cart::create($user);
+        $this->setEntityId($cart, $cartId);
+
+        return $cart;
     }
 }
