@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ExceptionListener;
+namespace App\Listener\Exception;
 
 use App\Exception\ApiExceptionInterface;
 use App\ExceptionHandler\ExceptionMappingDTO;
@@ -43,8 +43,8 @@ final readonly class ApiExceptionListener
             $mapping = ExceptionMappingDTO::fromTypeAndCode(self::FALLBACK_TYPE, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $type = $mapping->getType();
-        $statusCode = $mapping->getCode();
+        $type = $mapping->type;
+        $statusCode = $mapping->code;
         $title = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
         $detail = ($this->isDebug || $statusCode < Response::HTTP_INTERNAL_SERVER_ERROR) ? $exception->getMessage() : 'An unexpected error occurred. Please try again later';
 
@@ -53,7 +53,7 @@ final readonly class ApiExceptionListener
             $context = $exception->getContext();
         }
 
-        if ($mapping->getCode() >= Response::HTTP_INTERNAL_SERVER_ERROR || $mapping->isLoggable()) {
+        if ($mapping->code >= Response::HTTP_INTERNAL_SERVER_ERROR || $mapping->loggable) {
             $this->logger->error($exception->getMessage(), [
                 'url' => $event->getRequest()->getUri(),
                 'context' => $context,

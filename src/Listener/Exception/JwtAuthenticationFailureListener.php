@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ExceptionListener;
+namespace App\Listener\Exception;
 
 use App\Exception\ApiExceptionInterface;
 use App\Factory\ExceptionResponseFactory;
