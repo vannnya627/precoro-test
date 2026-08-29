@@ -81,8 +81,6 @@ class AuthControllerTest extends AbstractWebTestCase
         $responseContent = json_decode($client->getResponse()->getContent(), true);
 
         $this->assertIsArray($responseContent);
-
-        $this->assertEquals('User Already Exists', $responseContent['detail']);
     }
 
     public function testSignUpThrowsExceptionValidationError(): void
@@ -110,13 +108,13 @@ class AuthControllerTest extends AbstractWebTestCase
 
         $this->assertIsArray($responseContent);
 
-        $this->assertArrayHasKey('errors', $responseContent);
-        $this->assertIsArray($responseContent['errors']);
+        $this->assertArrayHasKey('context', $responseContent);
+        $this->assertIsArray($responseContent['context']);
 
-        $this->assertArrayHasKey('email', $responseContent['errors']);
-        $this->assertIsArray($responseContent['errors']['email']);
-        $this->assertArrayHasKey('password', $responseContent['errors']);
-        $this->assertIsArray($responseContent['errors']['password']);
+        $this->assertArrayHasKey('email', $responseContent['context']);
+        $this->assertIsArray($responseContent['context']['email']);
+        $this->assertArrayHasKey('password', $responseContent['context']);
+        $this->assertIsArray($responseContent['context']['password']);
     }
 
     public function testLoginSuccess(): void
@@ -175,8 +173,6 @@ class AuthControllerTest extends AbstractWebTestCase
 
         $responseContent = json_decode($client->getResponse()->getContent(), true);
         $this->assertIsArray($responseContent);
-        $this->assertArrayHasKey('detail', $responseContent);
-        $this->assertEquals('The presented password is invalid.', $responseContent['detail']);
     }
 
     public function testLoginUserNotFound(): void

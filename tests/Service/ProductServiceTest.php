@@ -51,7 +51,7 @@ class ProductServiceTest extends AbstractTestCase
         $this->productRepository->expects($this->once())
             ->method('getById')
             ->with($productId)
-            ->willThrowException(new ProductNotFoundException());
+            ->willThrowException(new ProductNotFoundException($productId));
 
         $this->expectException(ProductNotFoundException::class);
         $this->productService->getOne($productId);
@@ -169,7 +169,7 @@ class ProductServiceTest extends AbstractTestCase
         $this->productRepository->expects($this->once())
             ->method('getById')
             ->with($productId)
-            ->willThrowException(new ProductNotFoundException());
+            ->willThrowException(new ProductNotFoundException($productId));
 
         $this->productRepository->expects($this->never())->method('saveAndCommit');
 
@@ -210,7 +210,7 @@ class ProductServiceTest extends AbstractTestCase
         $this->productRepository->expects($this->once())
             ->method('getById')
             ->with($productId)
-            ->willThrowException(new ProductNotFoundException());
+            ->willThrowException(new ProductNotFoundException($productId));
 
         $this->productRepository->expects($this->never())
             ->method('removeAndCommit');

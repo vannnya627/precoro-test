@@ -24,7 +24,7 @@ final class ProductRepository extends ServiceEntityRepository implements Product
 
     public function getById(int $productId): Product
     {
-        return $this->find($productId) ?? throw new ProductNotFoundException();
+        return $this->find($productId) ?? throw new ProductNotFoundException($productId);
     }
 
     /**

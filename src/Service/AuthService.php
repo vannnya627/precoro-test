@@ -29,7 +29,7 @@ final readonly class AuthService implements AuthServiceInterface
     {
         $email = $request->email;
         if ($this->userRepository->existByEmail($email)) {
-            throw new UserAlreadyExistsException();
+            throw new UserAlreadyExistsException($email);
         }
 
         $hasher = $this->passwordHasherFactory->getPasswordHasher(User::class);

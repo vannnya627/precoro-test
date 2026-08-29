@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\ExceptionListener;
 
-use App\DTO\Error\ErrorResponseDTO;
+use App\Exception\ApiExceptionInterface;
+use App\Factory\ExceptionResponseFactory;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationFailureEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsEventListener(event: 'lexik_jwt_authentication.on_authentication_failure', priority: 5)]
 #[AsEventListener(event: 'lexik_jwt_authentication.on_jwt_invalid', priority: 5)]
@@ -21,7 +19,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 final readonly class JwtAuthenticationFailureListener
 {
     public function __construct(
-        private SerializerInterface $serializer,
+        private ExceptionResponseFactory $exceptionFactory,
         private bool $isDebug,
     ) {
     }
@@ -31,19 +29,29 @@ final readonly class JwtAuthenticationFailureListener
      */
     public function __invoke(AuthenticationFailureEvent $event): void
     {
-        $type = 'jwt-error';
+        $exception = $event->getException();
+
+        $type = $exception instanceof BadCredentialsException ? 'invalid-credentials' : 'jwt-error';
         $statusCode = Response::HTTP_UNAUTHORIZED;
         $title = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
 
-        $detail = $event->getException()->getMessage();
-        $trace = $this->isDebug ? $event->getException()->getTraceAsString() : null;
+        $context = [];
+        if ($exception instanceof ApiExceptionInterface) {
+            $context = $exception->getContext();
+        }
 
-        $dto = new ErrorResponseDTO($type, $statusCode, $title, $detail, null, $trace);
+        $detail = $exception->getMessageKey();
+        $trace = $this->isDebug ? $exception->getTraceAsString() : null;
 
-        $data = $this->serializer->serialize($dto, JsonEncoder::FORMAT, [
-            AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-        ]);
+        $response = $this->exceptionFactory->create(
+            type: $type,
+            statusCode: $statusCode,
+            title: $title,
+            detail: $detail,
+            context: empty($context) ? null : $context,
+            trace: $trace
+        );
 
-        $event->setResponse(new JsonResponse($data, $statusCode, ['Content-Type' => 'application/problem+json'], true));
+        $event->setResponse($response);
     }
 }

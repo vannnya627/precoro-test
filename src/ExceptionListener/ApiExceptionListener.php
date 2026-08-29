@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace App\ExceptionListener;
 
-use App\DTO\Error\ErrorResponseDTO;
+use App\Exception\ApiExceptionInterface;
 use App\ExceptionHandler\ExceptionMappingDTO;
 use App\ExceptionHandler\ExceptionMappingResolver;
+use App\Factory\ExceptionResponseFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsEventListener(event: 'kernel.exception', priority: -1)]
 final readonly class ApiExceptionListener
@@ -25,7 +22,7 @@ final readonly class ApiExceptionListener
     public function __construct(
         private ExceptionMappingResolver $resolver,
         private LoggerInterface $logger,
-        private SerializerInterface $serializer,
+        private ExceptionResponseFactory $exceptionFactory,
         private bool $isDebug,
     ) {
     }
@@ -46,27 +43,35 @@ final readonly class ApiExceptionListener
             $mapping = ExceptionMappingDTO::fromTypeAndCode(self::FALLBACK_TYPE, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        if ($mapping->getCode() >= Response::HTTP_INTERNAL_SERVER_ERROR || $mapping->isLoggable()) {
-            $this->logger->error($exception, [
-                'trace' => $exception->getTraceAsString(),
-            ]);
-        }
-
         $type = $mapping->getType();
         $statusCode = $mapping->getCode();
         $title = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
-        $detail = $this->isDebug ? $exception->getMessage() : 'An unexpected error occurred. Please try again later';
+        $detail = ($this->isDebug || $statusCode < Response::HTTP_INTERNAL_SERVER_ERROR) ? $exception->getMessage() : 'An unexpected error occurred. Please try again later';
+
+        $context = [];
+        if ($exception instanceof ApiExceptionInterface) {
+            $context = $exception->getContext();
+        }
+
+        if ($mapping->getCode() >= Response::HTTP_INTERNAL_SERVER_ERROR || $mapping->isLoggable()) {
+            $this->logger->error($exception->getMessage(), [
+                'url' => $event->getRequest()->getUri(),
+                'context' => $context,
+                'trace' => $this->isDebug ? $exception->getTraceAsString() : null,
+            ]);
+        }
+
         $trace = $this->isDebug ? $exception->getTraceAsString() : null;
 
-        $dto = new ErrorResponseDTO($type, $statusCode, $title, $detail, null, $trace);
-        $data = $this->serializer->serialize(
-            $dto,
-            JsonEncoder::FORMAT,
-            [
-                AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-            ]
+        $response = $this->exceptionFactory->create(
+            type: $type,
+            statusCode: $statusCode,
+            title: $title,
+            detail: $detail,
+            context: empty($context) ? null : $context,
+            trace: $trace
         );
 
-        $event->setResponse(new JsonResponse($data, $statusCode, ['Content-Type' => 'application/problem+json'], true));
+        $event->setResponse($response);
     }
 }

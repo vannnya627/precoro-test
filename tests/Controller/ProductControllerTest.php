@@ -124,7 +124,7 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $responseContent = json_decode($client->getResponse()->getContent(), true);
         $this->assertIsArray($responseContent);
-        $this->assertArrayHasKey('errors', $responseContent);
+        $this->assertArrayHasKey('context', $responseContent);
     }
 
     public function testUpdateProduct(): void

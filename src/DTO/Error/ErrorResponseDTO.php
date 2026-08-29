@@ -9,7 +9,7 @@ use OpenApi\Attributes as OA;
 final readonly class ErrorResponseDTO
 {
     /**
-     * @param array<string, array<string>>|null $errors
+     * @param array<string, mixed>|null $context
      */
     public function __construct(
         public string $type,
@@ -18,16 +18,11 @@ final readonly class ErrorResponseDTO
         public string $detail,
 
         #[OA\Property(
-            description: 'Помилки валідації, згруповані по полям',
+            description: 'Додатковий контекст помилки бізнес-логіки',
             type: 'object',
-            example: ['errorField' => ['Validation Error Message']],
-            additionalProperties: new OA\AdditionalProperties(
-                type: 'array',
-                items: new OA\Items(type: 'string')
-            )
+            example: ['cart_id' => 99]
         )]
-        public ?array $errors = null,
-
+        public ?array $context = null,
         #[OA\Property(
             description: 'Трейс (Доступний тільки у debug=true)',
             example: '#0 someTrace....',

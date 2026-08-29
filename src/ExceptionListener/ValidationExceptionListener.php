@@ -4,22 +4,18 @@ declare(strict_types=1);
 
 namespace App\ExceptionListener;
 
-use App\DTO\Error\ErrorResponseDTO;
+use App\Factory\ExceptionResponseFactory;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 #[AsEventListener(event: 'kernel.exception', priority: 10)]
 final readonly class ValidationExceptionListener
 {
     public function __construct(
-        private SerializerInterface $serializer,
+        private ExceptionResponseFactory $exceptionFactory,
         private bool $isDebug,
     ) {
     }
@@ -46,26 +42,29 @@ final readonly class ValidationExceptionListener
         }
 
         /**
-         * @var array<string, list<string>> $errors
+         * @var array<string, list<string>> $context
          */
-        $errors = [];
-
+        $context = [];
         foreach ($validationException->getViolations() as $violation) {
-            $errors[$violation->getPropertyPath()][] = (string) $violation->getMessage();
+            $context[$violation->getPropertyPath()][] = (string) $violation->getMessage();
         }
+
         $type = 'validation-error';
         $statusCode = Response::HTTP_UNPROCESSABLE_ENTITY;
         $title = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
+
         $detail = 'The provided data is invalid. Please check the "errors" property for more details.';
         $trace = $this->isDebug ? $exception->getTraceAsString() : null;
 
-        $dto = new ErrorResponseDTO($type, $statusCode, $title, $detail, $errors, $trace);
-        $data = $this->serializer->serialize($dto, JsonEncoder::FORMAT,
-            [
-                AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-            ]
+        $response = $this->exceptionFactory->create(
+            type: $type,
+            statusCode: $statusCode,
+            title: $title,
+            detail: $detail,
+            context: empty($context) ? null : $context,
+            trace: $trace
         );
 
-        $event->setResponse(new JsonResponse($data, $statusCode, ['Content-Type' => 'application/problem+json'], true));
+        $event->setResponse($response);
     }
 }

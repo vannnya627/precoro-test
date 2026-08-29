@@ -85,7 +85,7 @@ class CartServiceTest extends AbstractTestCase
         $this->productRepository->expects($this->once())
             ->method('getById')
             ->with($productId)
-            ->willThrowException(new ProductNotFoundException());
+            ->willThrowException(new ProductNotFoundException($productId));
 
         $this->cartRepository->expects($this->never())
             ->method('saveAndCommit');

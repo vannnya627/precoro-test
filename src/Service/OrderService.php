@@ -30,7 +30,7 @@ final readonly class OrderService implements OrderServiceInterface
         $cart = $this->cartRepository->findCartWithItemsAndProducts($user);
 
         if (null === $cart || $cart->cartItems->isEmpty()) {
-            throw new EmptyCartException();
+            throw new EmptyCartException($cart?->id);
         }
         $order = Order::create($user);
         $order->addItemsFromCart($cart->cartItems);
