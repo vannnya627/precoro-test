@@ -48,7 +48,7 @@ final class OrderItem
 
     public static function create(Order $order, CartItem $cartItem): static
     {
-        $orderItem = new static();
+        $orderItem = new self();
         $orderItem->order = $order;
         $orderItem->product = $cartItem->product;
         $orderItem->quantity = $cartItem->quantity;

@@ -43,7 +43,7 @@ final class CartItem
 
     public static function create(Cart $cart, Product $product, int $quantity): static
     {
-        $cartItem = new static();
+        $cartItem = new self();
         $cartItem->cart = $cart;
         $cartItem->product = $product;
         $cartItem->quantity = $quantity;

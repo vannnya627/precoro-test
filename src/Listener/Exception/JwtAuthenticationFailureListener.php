@@ -48,7 +48,7 @@ final readonly class JwtAuthenticationFailureListener
             statusCode: $statusCode,
             title: $title,
             detail: $detail,
-            context: empty($context) ? null : $context,
+            context: [] === $context ? null : $context,
             trace: $trace
         );
 

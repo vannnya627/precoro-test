@@ -151,9 +151,7 @@ class CartServiceTest extends AbstractTestCase
 
         $this->cartRepository->expects($this->once())
             ->method('saveAndCommit')
-            ->with($this->callback(function (Cart $savedCart) use ($user) {
-                return $savedCart->user === $user;
-            }));
+            ->with($this->callback(fn (Cart $savedCart) => $savedCart->user === $user));
 
         $this->cartService->addItem($request, $user);
 

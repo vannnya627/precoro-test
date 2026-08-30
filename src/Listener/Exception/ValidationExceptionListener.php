@@ -29,7 +29,7 @@ final readonly class ValidationExceptionListener
 
         $validationException = null;
 
-        while (null !== $exception) {
+        while ($exception instanceof \Throwable) {
             if ($exception instanceof ValidationFailedException) {
                 $validationException = $exception;
                 break;
@@ -37,7 +37,7 @@ final readonly class ValidationExceptionListener
             $exception = $exception->getPrevious();
         }
 
-        if (null === $validationException) {
+        if (!$validationException instanceof ValidationFailedException) {
             return;
         }
 

@@ -8,7 +8,7 @@ trait RepositorySupportTrait
 {
     public function save(object $object): void
     {
-        assert($this->getClassName() === get_class($object));
+        assert($this->getClassName() === $object::class);
         $this->getEntityManager()->persist($object);
     }
 
@@ -22,7 +22,7 @@ trait RepositorySupportTrait
 
     public function remove(object $object): void
     {
-        assert($this->getClassName() === get_class($object));
+        assert($this->getClassName() === $object::class);
         $this->getEntityManager()->remove($object);
     }
 

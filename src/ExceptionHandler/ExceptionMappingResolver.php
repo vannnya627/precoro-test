@@ -32,16 +32,7 @@ final class ExceptionMappingResolver
 
     public function resolve(string $throwableClass): ?ExceptionMappingDTO
     {
-        $foundMapping = null;
-
-        foreach ($this->mappings as $class => $mapping) {
-            if ($throwableClass === $class || is_subclass_of($throwableClass, $class)) {
-                $foundMapping = $mapping;
-                break;
-            }
-        }
-
-        return $foundMapping;
+        return array_find($this->mappings, fn ($mapping, $class) => $throwableClass === $class || is_subclass_of($throwableClass, $class));
     }
 
     private function addMapping(string $class, string $type, int $code, bool $loggable): void

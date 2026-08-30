@@ -120,7 +120,7 @@ final class Order
 
     public static function create(User $user): static
     {
-        $order = new static();
+        $order = new self();
         $order->user = $user;
 
         return $order;
@@ -136,6 +136,7 @@ final class Order
 
             $this->orderItems->add($orderItem);
         }
+
         $this->recalculateTotalPrice();
     }
 }

@@ -41,9 +41,7 @@ final readonly class ProductService implements ProductServiceInterface
      */
     public function getAll(): array
     {
-        return array_map(function (Product $product) {
-            return ProductResponseDTO::create($product);
-        }, $this->productRepository->findProducts());
+        return array_map(callback: ProductResponseDTO::create(...), array: $this->productRepository->findProducts());
     }
 
     /**

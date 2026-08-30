@@ -16,6 +16,7 @@ final readonly class JwtCreatedListener
         if (!$user instanceof User) {
             return;
         }
+
         $payload = $event->getData();
 
         $payload['id'] = $user->id;

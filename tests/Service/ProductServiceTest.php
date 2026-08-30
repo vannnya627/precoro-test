@@ -71,9 +71,7 @@ class ProductServiceTest extends AbstractTestCase
             ->method('findProducts')
             ->willReturn($products);
 
-        $expectedResponse = array_map(function (Product $product) {
-            return ProductResponseDTO::create($product);
-        }, $products);
+        $expectedResponse = array_map(ProductResponseDTO::create(...), $products);
 
         $response = $this->productService->getAll();
         $this->assertEquals($expectedResponse, $response);
@@ -86,9 +84,7 @@ class ProductServiceTest extends AbstractTestCase
             ->method('findProducts')
             ->willReturn($products);
 
-        $expectedResponse = array_map(function (Product $product) {
-            return ProductResponseDTO::create($product);
-        }, $products);
+        $expectedResponse = array_map(ProductResponseDTO::create(...), $products);
 
         $response = $this->productService->getAll();
         $this->assertEquals($expectedResponse, $response);

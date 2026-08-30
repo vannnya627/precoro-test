@@ -38,10 +38,8 @@ final readonly class ApiExceptionListener
 
         $exception = $event->getThrowable();
 
-        $mapping = $this->resolver->resolve(get_class($exception));
-        if (null === $mapping) {
-            $mapping = ExceptionMappingDTO::fromTypeAndCode(self::FALLBACK_TYPE, Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        $mapping = $this->resolver->resolve($exception::class);
+        $mapping ??= ExceptionMappingDTO::fromTypeAndCode(self::FALLBACK_TYPE, Response::HTTP_INTERNAL_SERVER_ERROR);
 
         $type = $mapping->type;
         $statusCode = $mapping->code;
@@ -68,7 +66,7 @@ final readonly class ApiExceptionListener
             statusCode: $statusCode,
             title: $title,
             detail: $detail,
-            context: empty($context) ? null : $context,
+            context: [] === $context ? null : $context,
             trace: $trace
         );
 

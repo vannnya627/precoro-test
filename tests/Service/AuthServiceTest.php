@@ -50,7 +50,7 @@ class AuthServiceTest extends AbstractTestCase
             ->with($request->email)
             ->willReturn(null);
 
-        $hasherMock = $this->createMock(PasswordHasherInterface::class);
+        $hasherMock = $this->createStub(PasswordHasherInterface::class);
         $this->passwordHasherFactory->expects($this->once())
             ->method('getPasswordHasher')
             ->with(User::class)
@@ -69,9 +69,7 @@ class AuthServiceTest extends AbstractTestCase
         $token = 'testToken';
         $this->JWTTokenManager->expects($this->once())
             ->method('create')
-            ->with($this->callback(function (User $createdUser) {
-                return 'test@test.com' === $createdUser->email;
-            }))
+            ->with($this->callback(fn (User $createdUser) => 'test@test.com' === $createdUser->email))
             ->willReturn($token);
 
         $expectedResponse = new SignUpResponseDTO(

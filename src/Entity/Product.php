@@ -72,7 +72,7 @@ final class Product
 
     public static function create(string $name, string $description, int $price): static
     {
-        $product = new static();
+        $product = new self();
         $product->name = $name;
         $product->description = $description;
         $product->price = $price;

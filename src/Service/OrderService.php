@@ -43,9 +43,7 @@ final readonly class OrderService implements OrderServiceInterface
         $this->orderRepository->commit();
 
         $orderItemsDTO = array_values(
-            $order->getOrderItems()->map(function (OrderItem $orderItem): OrderItemResponseDTO {
-                return OrderItemResponseDTO::create($orderItem);
-            })->toArray()
+            $order->getOrderItems()->map(fn (OrderItem $orderItem): OrderItemResponseDTO => OrderItemResponseDTO::create($orderItem))->toArray()
         );
 
         return $this->mapToOrderDTO($order, $orderItemsDTO);
