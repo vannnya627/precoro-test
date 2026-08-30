@@ -21,8 +21,7 @@ final class ProductController extends AbstractController
 {
     public function __construct(
         private readonly ProductServiceInterface $productService,
-    ) {
-    }
+    ) {}
 
     #[OA\Get(
         operationId: 'api_get_product',
@@ -32,19 +31,19 @@ final class ProductController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'Success',
-        content: new OA\JsonContent(ref: new Model(type: ProductResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ProductResponseDTO::class)),
     )]
     #[OA\Response(
         response: 404,
         description: 'Product not found',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class)),
     )]
     #[OA\Parameter(
         name: 'productId',
         description: 'Id Продукту',
         in: 'path',
         required: true,
-        schema: new OA\Schema(type: 'integer')
+        schema: new OA\Schema(type: 'integer'),
     )]
     #[Route('/api/v1/product/{productId}', name: 'api_get_product', methods: ['GET'])]
     public function getProduct(int $productId): JsonResponse
@@ -63,9 +62,9 @@ final class ProductController extends AbstractController
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(
-                ref: new Model(type: ProductResponseDTO::class)
-            )
-        )
+                ref: new Model(type: ProductResponseDTO::class),
+            ),
+        ),
     )]
     #[Route('/api/v1/products', name: 'api_get_all_product', methods: ['GET'])]
     public function getProducts(): JsonResponse
@@ -81,16 +80,16 @@ final class ProductController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'Success',
-        content: new OA\JsonContent(ref: new Model(type: ProductResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ProductResponseDTO::class)),
     )]
     #[OA\Response(
         response: 422,
         description: 'Validation error',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class)),
     )]
     #[OA\RequestBody(
         description: 'Request body',
-        content: new OA\JsonContent(ref: new Model(type: ProductRequestDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ProductRequestDTO::class)),
     )]
     #[Route(path: '/api/v1/product', name: 'api_create_product', methods: ['POST'])]
     public function createProduct(#[MapRequestPayload] ProductRequestDTO $request): JsonResponse
@@ -106,23 +105,23 @@ final class ProductController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'Success',
-        content: new OA\JsonContent(ref: new Model(type: ProductResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ProductResponseDTO::class)),
     )]
     #[OA\Response(
         response: 404,
         description: 'Product not found',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class)),
     )]
     #[OA\RequestBody(
         description: 'Request body',
-        content: new OA\JsonContent(ref: new Model(type: UpdateProductRequestDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: UpdateProductRequestDTO::class)),
     )]
     #[OA\Parameter(
         name: 'productId',
         description: 'Id Продукту',
         in: 'path',
         required: true,
-        schema: new OA\Schema(type: 'integer')
+        schema: new OA\Schema(type: 'integer'),
     )]
     #[Route(path: '/api/v1/product/{productId}', name: 'api_update_product', methods: ['PATCH'])]
     public function updateProduct(#[MapRequestPayload] UpdateProductRequestDTO $request, int $productId): JsonResponse
@@ -141,20 +140,20 @@ final class ProductController extends AbstractController
         content: new OA\JsonContent(
             properties: [
                 new OA\Property(property: 'message', type: 'string'),
-            ]
-        )
+            ],
+        ),
     )]
     #[OA\Response(
         response: 404,
         description: 'Product not found',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class)),
     )]
     #[OA\Parameter(
         name: 'productId',
         description: 'Id Продукту',
         in: 'path',
         required: true,
-        schema: new OA\Schema(type: 'integer')
+        schema: new OA\Schema(type: 'integer'),
     )]
     #[Route(path: '/api/v1/product/{productId}', name: 'api_delete_product', methods: ['DELETE'])]
     public function deleteProduct(int $productId): JsonResponse

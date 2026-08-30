@@ -13,8 +13,7 @@ final readonly class OrderItemResponseDTO
         public string $productName,
         public int $quantity,
         public int $price,
-    ) {
-    }
+    ) {}
 
     public static function create(OrderItem $orderItem): self
     {

@@ -16,6 +16,8 @@ use App\Service\CartService;
 use App\Tests\AbstractTestCase;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionException;
+use Throwable;
 
 #[AllowMockObjectsWithoutExpectations]
 class CartServiceTest extends AbstractTestCase
@@ -32,8 +34,8 @@ class CartServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testAddItem()
     {
@@ -69,8 +71,8 @@ class CartServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testAddItemWhenThrowsExceptionProductNotFound(): void
     {
@@ -95,8 +97,8 @@ class CartServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testAddCompletelyNewItemToCart(): void
     {
@@ -134,8 +136,8 @@ class CartServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testAddItemWhenUserHasNoCart(): void
     {
@@ -151,7 +153,7 @@ class CartServiceTest extends AbstractTestCase
 
         $this->cartRepository->expects($this->once())
             ->method('saveAndCommit')
-            ->with($this->callback(fn (Cart $savedCart) => $savedCart->user === $user));
+            ->with($this->callback(fn(Cart $savedCart) => $savedCart->user === $user));
 
         $this->cartService->addItem($request, $user);
 
@@ -160,7 +162,7 @@ class CartServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function testGetList(): void
     {
@@ -191,7 +193,7 @@ class CartServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function testGetListWhenCartIsNullOrEmpty(): void
     {
@@ -211,7 +213,7 @@ class CartServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function createUser(): User
     {
@@ -223,7 +225,7 @@ class CartServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function createProduct(): Product
     {
@@ -235,7 +237,7 @@ class CartServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function createCart(User $user): Cart
     {

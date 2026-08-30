@@ -17,8 +17,7 @@ final readonly class HttpExceptionListener
     public function __construct(
         private ExceptionResponseFactory $exceptionFactory,
         private bool $isDebug,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws ExceptionInterface
@@ -42,7 +41,7 @@ final readonly class HttpExceptionListener
             statusCode: $statusCode,
             title: $title,
             detail: $detail,
-            trace: $trace
+            trace: $trace,
         );
 
         $response->headers->add($exception->getHeaders());

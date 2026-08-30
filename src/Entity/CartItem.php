@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 
 #[ORM\Entity]
 final class CartItem
@@ -26,15 +27,13 @@ final class CartItem
     public private(set) int $quantity = 1 {
         set(int $value) {
             if ($value < 1) {
-                throw new \InvalidArgumentException('Кількість не може бути менша 1');
+                throw new InvalidArgumentException('Кількість не може бути менша 1');
             }
             $this->quantity = $value;
         }
     }
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public function addQuantity(int $quantity): void
     {

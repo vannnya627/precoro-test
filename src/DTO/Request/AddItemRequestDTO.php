@@ -20,6 +20,5 @@ final readonly class AddItemRequestDTO
         #[Assert\Positive(message: "Поле 'quantity' не може бути менше нуля або дорівнювати нулю")]
         #[Assert\Type('int', message: 'Кількість одиниць товару має бути цілим числом')]
         public int $quantity,
-    ) {
-    }
+    ) {}
 }

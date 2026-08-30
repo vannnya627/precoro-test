@@ -14,16 +14,14 @@ final readonly class SignUpRequestDTO
         #[Assert\NotBlank(message: 'Email не може бути порожнім.')]
         #[Assert\Email]
         public string $email,
-
         #[OA\Property(description: 'Пароль користувача', example: '1234567890')]
         #[Assert\NotBlank(message: 'Пароль не може бути порожнім.')]
         #[Assert\Length(
             min: 8,
             max: 64,
             minMessage: 'Пароль має містити щонайменше {{ limit }} символів.',
-            maxMessage: 'Пароль надто довгий.'
+            maxMessage: 'Пароль надто довгий.',
         )]
         public string $password,
-    ) {
-    }
+    ) {}
 }

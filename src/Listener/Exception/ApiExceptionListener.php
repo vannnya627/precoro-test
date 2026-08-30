@@ -24,8 +24,7 @@ final readonly class ApiExceptionListener
         private LoggerInterface $logger,
         private ExceptionResponseFactory $exceptionFactory,
         private bool $isDebug,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws ExceptionInterface
@@ -67,7 +66,7 @@ final readonly class ApiExceptionListener
             title: $title,
             detail: $detail,
             context: [] === $context ? null : $context,
-            trace: $trace
+            trace: $trace,
         );
 
         $event->setResponse($response);

@@ -35,9 +35,9 @@ class CartControllerTest extends AbstractWebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_AUTHORIZATION' => 'Bearer '.$token,
+                'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
             ],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseIsSuccessful();
@@ -61,7 +61,7 @@ class CartControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseStatusCodeSame(401);
@@ -87,9 +87,9 @@ class CartControllerTest extends AbstractWebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_AUTHORIZATION' => 'Bearer '.$token,
+                'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
             ],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseStatusCodeSame(404);
@@ -111,12 +111,12 @@ class CartControllerTest extends AbstractWebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_AUTHORIZATION' => 'Bearer '.$token,
+                'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
             ],
             json_encode([
                 'productId' => $product->id,
                 'quantity' => 3,
-            ])
+            ]),
         );
         $this->assertResponseIsSuccessful();
 
@@ -125,7 +125,7 @@ class CartControllerTest extends AbstractWebTestCase
             '/api/v1/cart',
             [],
             [],
-            ['HTTP_AUTHORIZATION' => 'Bearer '.$token]
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $token],
         );
 
         $this->assertResponseIsSuccessful();
@@ -180,7 +180,7 @@ class CartControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode(['email' => 'user@test.com', 'password' => 'password'])
+            json_encode(['email' => 'user@test.com', 'password' => 'password']),
         );
 
         $response = json_decode($client->getResponse()->getContent(), true);

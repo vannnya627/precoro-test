@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Exception;
 
-final class ProductNotFoundException extends \RuntimeException implements ApiExceptionInterface
+use RuntimeException;
+
+final class ProductNotFoundException extends RuntimeException implements ApiExceptionInterface
 {
     public function __construct(private readonly int $productId)
     {

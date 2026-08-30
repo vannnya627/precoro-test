@@ -20,8 +20,7 @@ final class OrderController extends AbstractController
 {
     public function __construct(
         private readonly OrderServiceInterface $orderService,
-    ) {
-    }
+    ) {}
 
     #[OA\Post(
         operationId: 'api_create_order',
@@ -31,12 +30,12 @@ final class OrderController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'Success',
-        content: new OA\JsonContent(ref: new Model(type: OrderResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: OrderResponseDTO::class)),
     )]
     #[OA\Response(
         response: 422,
         description: 'Cart Is Empty',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class)),
     )]
     #[OA\Response(
         response: 401,
@@ -45,8 +44,8 @@ final class OrderController extends AbstractController
             properties: [
                 new OA\Property(property: 'code', type: 'int'),
                 new OA\Property(property: 'message', type: 'string'),
-            ]
-        )
+            ],
+        ),
     )]
     #[Route(path: '/api/v1/order', name: 'api_create_order', methods: ['POST'])]
     public function create(#[CurrentUser] User $user): JsonResponse
@@ -65,9 +64,9 @@ final class OrderController extends AbstractController
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(
-                ref: new Model(type: OrderResponseDTO::class)
-            )
-        )
+                ref: new Model(type: OrderResponseDTO::class),
+            ),
+        ),
     )]
     #[OA\Response(
         response: 401,
@@ -76,8 +75,8 @@ final class OrderController extends AbstractController
             properties: [
                 new OA\Property(property: 'code', type: 'int'),
                 new OA\Property(property: 'message', type: 'string'),
-            ]
-        )
+            ],
+        ),
     )]
     #[Route('/api/v1/orders', name: 'api_list_orders', methods: ['GET'])]
     public function getProducts(#[CurrentUser] User $user): JsonResponse

@@ -22,8 +22,7 @@ final class CartController extends AbstractController
 {
     public function __construct(
         private readonly CartServiceInterface $cartService,
-    ) {
-    }
+    ) {}
 
     #[OA\Post(
         operationId: 'api_add_product_to_cart',
@@ -36,17 +35,17 @@ final class CartController extends AbstractController
         content: new OA\JsonContent(
             properties: [
                 new OA\Property(property: 'message', type: 'string'),
-            ]
-        )
+            ],
+        ),
     )]
     #[OA\Response(
         response: 404,
         description: 'Product not found',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class)),
     )]
     #[OA\RequestBody(
         description: 'Request body',
-        content: new OA\JsonContent(ref: new Model(type: AddItemRequestDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: AddItemRequestDTO::class)),
     )]
     #[OA\Response(
         response: 401,
@@ -55,8 +54,8 @@ final class CartController extends AbstractController
             properties: [
                 new OA\Property(property: 'code', type: 'int'),
                 new OA\Property(property: 'message', type: 'string'),
-            ]
-        )
+            ],
+        ),
     )]
     #[Route(path: '/api/v1/cart', name: 'api_add_product_to_cart', methods: ['POST'])]
     public function addItemToCart(#[MapRequestPayload] AddItemRequestDTO $request, #[CurrentUser] User $user): JsonResponse
@@ -77,9 +76,9 @@ final class CartController extends AbstractController
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(
-                ref: new Model(type: ProductResponseDTO::class)
-            )
-        )
+                ref: new Model(type: ProductResponseDTO::class),
+            ),
+        ),
     )]
     #[OA\Response(
         response: 401,
@@ -88,8 +87,8 @@ final class CartController extends AbstractController
             properties: [
                 new OA\Property(property: 'code', type: 'int'),
                 new OA\Property(property: 'message', type: 'string'),
-            ]
-        )
+            ],
+        ),
     )]
     #[Route('/api/v1/cart', name: 'api_list_items', methods: ['GET'])]
     public function getProducts(#[CurrentUser] User $user): JsonResponse

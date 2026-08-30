@@ -23,6 +23,5 @@ final readonly class ProductRequestDTO
         #[Assert\Positive(message: "Поле 'price' не може бути менше нуля або дорівнювати нулю")]
         #[Assert\Type('int', message: 'Ціна має бути цілим числом (копійки)')]
         public int $price,
-    ) {
-    }
+    ) {}
 }

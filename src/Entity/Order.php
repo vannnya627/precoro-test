@@ -9,6 +9,7 @@ use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use DateTimeImmutable;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -31,10 +32,10 @@ final class Order
     private OrderStatus $status = OrderStatus::NEW;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
+    private ?DateTimeImmutable $updatedAt = null;
 
     /**
      * @var Collection<int, OrderItem>
@@ -43,7 +44,7 @@ final class Order
         targetEntity: OrderItem::class,
         mappedBy: 'order',
         cascade: ['persist', 'remove'],
-        orphanRemoval: true
+        orphanRemoval: true,
     )]
     private Collection $orderItems;
 
@@ -72,12 +73,12 @@ final class Order
         return $this->status;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?DateTimeImmutable
     {
         return $this->updatedAt;
     }
@@ -85,14 +86,14 @@ final class Order
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     #[ORM\PreUpdate]
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     /**

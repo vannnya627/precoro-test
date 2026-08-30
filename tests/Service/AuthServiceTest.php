@@ -16,6 +16,8 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 use Symfony\Component\PasswordHasher\PasswordHasherInterface;
+use ReflectionException;
+use Throwable;
 
 #[AllowMockObjectsWithoutExpectations]
 class AuthServiceTest extends AbstractTestCase
@@ -34,13 +36,13 @@ class AuthServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function testSignUp()
     {
         $request = new SignUpRequestDTO(
             'test@test.com',
-            '1234567890'
+            '1234567890',
         );
 
         $passwordHash = 'gdfgergerer3r34t4gffrerhg';
@@ -69,27 +71,27 @@ class AuthServiceTest extends AbstractTestCase
         $token = 'testToken';
         $this->JWTTokenManager->expects($this->once())
             ->method('create')
-            ->with($this->callback(fn (User $createdUser) => 'test@test.com' === $createdUser->email))
+            ->with($this->callback(fn(User $createdUser) => 'test@test.com' === $createdUser->email))
             ->willReturn($token);
 
         $expectedResponse = new SignUpResponseDTO(
             userId: $user->id,
             email: $user->email,
-            token: $token
+            token: $token,
         );
         $result = $this->authService->signUp($request);
         $this->assertEquals($expectedResponse, $result);
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testSignUpThrowsUserAlreadyExistsException()
     {
         $request = new SignUpRequestDTO(
             'test@test.com',
-            '1234567890'
+            '1234567890',
         );
 
         $passwordHash = 'gdfgergerer3r34t4gffrerhg';
@@ -115,7 +117,7 @@ class AuthServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function createUser(string $email, string $passwordHash): User
     {

@@ -14,6 +14,5 @@ final readonly class OrderResponseDTO
         public int $totalPrice,
         public string $status,
         public array $orderItems,
-    ) {
-    }
+    ) {}
 }

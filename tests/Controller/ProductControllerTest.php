@@ -19,7 +19,7 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $client->request(
             'GET',
-            '/api/v1/product/'.$product->id
+            '/api/v1/product/' . $product->id,
         );
 
         $this->assertResponseIsSuccessful();
@@ -39,7 +39,7 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $client->request(
             'GET',
-            '/api/v1/product/99999'
+            '/api/v1/product/99999',
         );
 
         $this->assertResponseStatusCodeSame(404);
@@ -55,7 +55,7 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $client->request(
             'GET',
-            '/api/v1/products'
+            '/api/v1/products',
         );
 
         $this->assertResponseIsSuccessful();
@@ -85,7 +85,7 @@ class ProductControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseIsSuccessful();
@@ -117,7 +117,7 @@ class ProductControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseStatusCodeSame(422);
@@ -141,11 +141,11 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $client->request(
             'PATCH',
-            '/api/v1/product/'.$product->id,
+            '/api/v1/product/' . $product->id,
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseIsSuccessful();
@@ -174,7 +174,7 @@ class ProductControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseStatusCodeSame(404);
@@ -190,7 +190,7 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $client->request(
             'DELETE',
-            '/api/v1/product/'.$productId
+            '/api/v1/product/' . $productId,
         );
 
         $this->assertResponseIsSuccessful();
@@ -209,7 +209,7 @@ class ProductControllerTest extends AbstractWebTestCase
 
         $client->request(
             'DELETE',
-            '/api/v1/product/99999'
+            '/api/v1/product/99999',
         );
 
         $this->assertResponseStatusCodeSame(404);

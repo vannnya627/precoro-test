@@ -28,7 +28,7 @@ class AuthControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseStatusCodeSame(201);
@@ -72,7 +72,7 @@ class AuthControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseStatusCodeSame(409);
@@ -98,7 +98,7 @@ class AuthControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseStatusCodeSame(422);
@@ -135,7 +135,7 @@ class AuthControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseIsSuccessful();
@@ -166,7 +166,7 @@ class AuthControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseStatusCodeSame(401);
@@ -190,7 +190,7 @@ class AuthControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseStatusCodeSame(401);
@@ -211,7 +211,7 @@ class AuthControllerTest extends AbstractWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode($payload)
+            json_encode($payload),
         );
 
         $this->assertResponseStatusCodeSame(404);

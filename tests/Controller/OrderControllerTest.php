@@ -31,8 +31,8 @@ class OrderControllerTest extends AbstractWebTestCase
             [],
             [],
             [
-                'HTTP_AUTHORIZATION' => 'Bearer '.$token,
-            ]
+                'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
+            ],
         );
 
         $this->assertResponseIsSuccessful();
@@ -64,8 +64,8 @@ class OrderControllerTest extends AbstractWebTestCase
             [],
             [],
             [
-                'HTTP_AUTHORIZATION' => 'Bearer '.$token,
-            ]
+                'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
+            ],
         );
 
         $this->assertResponseStatusCodeSame(422);
@@ -77,7 +77,7 @@ class OrderControllerTest extends AbstractWebTestCase
 
         $client->request(
             'POST',
-            '/api/v1/order'
+            '/api/v1/order',
         );
 
         $this->assertResponseStatusCodeSame(401);
@@ -99,7 +99,7 @@ class OrderControllerTest extends AbstractWebTestCase
             '/api/v1/order',
             [],
             [],
-            ['HTTP_AUTHORIZATION' => 'Bearer '.$token]
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $token],
         );
 
         $this->addProductToCart($client, $token, $product->id, 2);
@@ -108,7 +108,7 @@ class OrderControllerTest extends AbstractWebTestCase
             '/api/v1/order',
             [],
             [],
-            ['HTTP_AUTHORIZATION' => 'Bearer '.$token]
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $token],
         );
 
         $client->request(
@@ -116,7 +116,7 @@ class OrderControllerTest extends AbstractWebTestCase
             '/api/v1/orders',
             [],
             [],
-            ['HTTP_AUTHORIZATION' => 'Bearer '.$token]
+            ['HTTP_AUTHORIZATION' => 'Bearer ' . $token],
         );
 
         $this->assertResponseIsSuccessful();
@@ -147,8 +147,8 @@ class OrderControllerTest extends AbstractWebTestCase
             [],
             [],
             [
-                'HTTP_AUTHORIZATION' => 'Bearer '.$token,
-            ]
+                'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
+            ],
         );
 
         $this->assertResponseIsSuccessful();
@@ -202,7 +202,7 @@ class OrderControllerTest extends AbstractWebTestCase
             json_encode([
                 'email' => 'user@test.com',
                 'password' => 'password',
-            ])
+            ]),
         );
 
         $response = json_decode($client->getResponse()->getContent(), true);
@@ -219,12 +219,12 @@ class OrderControllerTest extends AbstractWebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_AUTHORIZATION' => 'Bearer '.$token,
+                'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
             ],
             json_encode([
                 'productId' => $productId,
                 'quantity' => $quantity,
-            ])
+            ]),
         );
     }
 }

@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Throwable;
 
 #[AsEventListener(event: 'kernel.exception', priority: 10)]
 final readonly class ValidationExceptionListener
@@ -17,8 +18,7 @@ final readonly class ValidationExceptionListener
     public function __construct(
         private ExceptionResponseFactory $exceptionFactory,
         private bool $isDebug,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws ExceptionInterface
@@ -29,7 +29,7 @@ final readonly class ValidationExceptionListener
 
         $validationException = null;
 
-        while ($exception instanceof \Throwable) {
+        while ($exception instanceof Throwable) {
             if ($exception instanceof ValidationFailedException) {
                 $validationException = $exception;
                 break;
@@ -62,7 +62,7 @@ final readonly class ValidationExceptionListener
             title: $title,
             detail: $detail,
             context: empty($context) ? null : $context,
-            trace: $trace
+            trace: $trace,
         );
 
         $event->setResponse($response);

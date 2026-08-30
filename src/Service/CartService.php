@@ -18,8 +18,7 @@ final readonly class CartService implements CartServiceInterface
     public function __construct(
         private CartRepositoryInterface $cartRepository,
         private ProductRepositoryInterface $productRepository,
-    ) {
-    }
+    ) {}
 
     public function addItem(AddItemRequestDTO $request, User $user): void
     {
@@ -54,7 +53,7 @@ final readonly class CartService implements CartServiceInterface
                     productName: $product->name,
                     quantity: $item->quantity,
                 );
-            })->toArray()
+            })->toArray(),
         );
     }
 }

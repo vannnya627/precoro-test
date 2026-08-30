@@ -13,17 +13,17 @@ use App\Exception\EmptyCartException;
 use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\OrderRepositoryInterface;
 use App\Service\Interface\OrderServiceInterface;
+use Throwable;
 
 final readonly class OrderService implements OrderServiceInterface
 {
     public function __construct(
         private OrderRepositoryInterface $orderRepository,
         private CartRepositoryInterface $cartRepository,
-    ) {
-    }
+    ) {}
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function create(User $user): OrderResponseDTO
     {
@@ -43,7 +43,7 @@ final readonly class OrderService implements OrderServiceInterface
         $this->orderRepository->commit();
 
         $orderItemsDTO = array_values(
-            $order->getOrderItems()->map(fn (OrderItem $orderItem): OrderItemResponseDTO => OrderItemResponseDTO::create($orderItem))->toArray()
+            $order->getOrderItems()->map(fn(OrderItem $orderItem): OrderItemResponseDTO => OrderItemResponseDTO::create($orderItem))->toArray(),
         );
 
         return $this->mapToOrderDTO($order, $orderItemsDTO);

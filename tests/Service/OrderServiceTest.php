@@ -15,6 +15,8 @@ use App\Service\OrderService;
 use App\Tests\AbstractTestCase;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionException;
+use Throwable;
 
 #[AllowMockObjectsWithoutExpectations]
 class OrderServiceTest extends AbstractTestCase
@@ -31,8 +33,8 @@ class OrderServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testCreate(): void
     {
@@ -80,8 +82,8 @@ class OrderServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testCreateWhenThrowsEmptyCartException(): void
     {
@@ -108,7 +110,7 @@ class OrderServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function testGetList(): void
     {
@@ -147,7 +149,7 @@ class OrderServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function testGetListWhenUserHasNoOrders(): void
     {
@@ -163,7 +165,7 @@ class OrderServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function createUser(): User
     {
@@ -175,7 +177,7 @@ class OrderServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function createProduct(): Product
     {
@@ -187,7 +189,7 @@ class OrderServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function createCart(User $user): Cart
     {

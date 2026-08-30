@@ -10,6 +10,11 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use DateTimeImmutable;
+use Deprecated;
+use InvalidArgumentException;
+
+use function assert;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -25,7 +30,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     public private(set) string $email {
         set(string $value) {
             if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                throw new \InvalidArgumentException('Невалідний email');
+                throw new InvalidArgumentException('Невалідний email');
             }
             $this->email = $value;
         }
@@ -44,10 +49,10 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     public private(set) string $password;
 
     #[ORM\Column]
-    public private(set) ?\DateTimeImmutable $createdAt = null;
+    public private(set) ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
-    public private(set) ?\DateTimeImmutable $updatedAt = null;
+    public private(set) ?DateTimeImmutable $updatedAt = null;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     public private(set) ?Cart $cart = null;
@@ -70,7 +75,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        \assert('' !== $this->email);
+        assert('' !== $this->email);
 
         return $this->email;
     }
@@ -102,7 +107,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    #[\Deprecated]
+    #[Deprecated]
     public function eraseCredentials(): void
     {
         // @deprecated, to be removed when upgrading to Symfony 8
@@ -111,14 +116,14 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     #[ORM\PreUpdate]
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     public function addOrder(Order $order): static

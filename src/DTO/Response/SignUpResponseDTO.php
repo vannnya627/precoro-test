@@ -10,6 +10,5 @@ final readonly class SignUpResponseDTO
         public int $userId,
         public string $email,
         public string $token,
-    ) {
-    }
+    ) {}
 }

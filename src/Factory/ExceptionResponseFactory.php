@@ -15,8 +15,7 @@ final readonly class ExceptionResponseFactory
 {
     public function __construct(
         private SerializerInterface $serializer,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array<string, mixed>|null $context
@@ -37,7 +36,7 @@ final readonly class ExceptionResponseFactory
             title: $title,
             detail: $detail,
             context: empty($context) ? null : $context,
-            trace: $trace
+            trace: $trace,
         );
 
         $data = $this->serializer->serialize($dto, JsonEncoder::FORMAT, [

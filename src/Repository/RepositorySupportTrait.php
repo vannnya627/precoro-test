@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use Throwable;
+
 trait RepositorySupportTrait
 {
     public function save(object $object): void
@@ -13,7 +15,7 @@ trait RepositorySupportTrait
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function commit(): void
     {
@@ -27,7 +29,7 @@ trait RepositorySupportTrait
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function saveAndCommit(object $object): void
     {
@@ -36,7 +38,7 @@ trait RepositorySupportTrait
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function removeAndCommit(object $object): void
     {

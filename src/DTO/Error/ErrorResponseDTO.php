@@ -16,11 +16,10 @@ final readonly class ErrorResponseDTO
         public int $status,
         public string $title,
         public string $detail,
-
         #[OA\Property(
             description: 'Додатковий контекст помилки бізнес-логіки',
             type: 'object',
-            example: ['cart_id' => 99]
+            example: ['cart_id' => 99],
         )]
         public ?array $context = null,
         #[OA\Property(
@@ -28,6 +27,5 @@ final readonly class ErrorResponseDTO
             example: '#0 someTrace....',
         )]
         public ?string $trace = null,
-    ) {
-    }
+    ) {}
 }

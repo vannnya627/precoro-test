@@ -10,6 +10,5 @@ final readonly class CartItemResponseDTO
         public int $productId,
         public string $productName,
         public int $quantity,
-    ) {
-    }
+    ) {}
 }

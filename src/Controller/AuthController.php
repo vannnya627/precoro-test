@@ -20,8 +20,7 @@ final class AuthController extends AbstractController
 {
     public function __construct(
         private readonly AuthServiceInterface $authService,
-    ) {
-    }
+    ) {}
 
     #[OA\Post(
         operationId: 'signUp',
@@ -31,22 +30,22 @@ final class AuthController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'Sign up success',
-        content: new OA\JsonContent(ref: new Model(type: SignUpResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: SignUpResponseDTO::class)),
     )]
     #[OA\Response(
         response: 409,
         description: 'User already exists',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class)),
     )]
     #[OA\Response(
         response: 422,
         description: 'Validation error',
-        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: ErrorResponseDTO::class)),
     )]
     #[OA\RequestBody(
         description: 'Request body',
         required: true,
-        content: new OA\JsonContent(ref: new Model(type: SignUpRequestDTO::class))
+        content: new OA\JsonContent(ref: new Model(type: SignUpRequestDTO::class)),
     )]
     #[Route('/api/v1/auth/signUp', name: 'signUp', methods: ['POST'])]
     public function signUp(#[MapRequestPayload] SignUpRequestDTO $request): JsonResponse
@@ -65,8 +64,8 @@ final class AuthController extends AbstractController
         content: new OA\JsonContent(
             properties: [
                 new OA\Property(property: 'token', type: 'string'),
-            ]
-        )
+            ],
+        ),
     )]
     #[OA\Response(
         response: 401,
@@ -75,8 +74,8 @@ final class AuthController extends AbstractController
             properties: [
                 new OA\Property(property: 'code', type: 'int'),
                 new OA\Property(property: 'message', type: 'string'),
-            ]
-        )
+            ],
+        ),
     )]
     #[OA\RequestBody(
         description: 'Request body',
@@ -86,11 +85,9 @@ final class AuthController extends AbstractController
             properties: [
                 new OA\Property(property: 'email', type: 'string', example: 'admin@gmail.com'),
                 new OA\Property(property: 'password', type: 'string', example: '1234567890'),
-            ]
-        )
+            ],
+        ),
     )]
     #[Route('/api/v1/auth/login', name: 'api_login', methods: ['POST'])]
-    public function login(): void
-    {
-    }
+    public function login(): void {}
 }

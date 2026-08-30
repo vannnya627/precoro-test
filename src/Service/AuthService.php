@@ -12,6 +12,7 @@ use App\Repository\Interface\UserRepositoryInterface;
 use App\Service\Interface\AuthServiceInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
+use Throwable;
 
 final readonly class AuthService implements AuthServiceInterface
 {
@@ -19,11 +20,10 @@ final readonly class AuthService implements AuthServiceInterface
         private UserRepositoryInterface $userRepository,
         private PasswordHasherFactoryInterface $passwordHasherFactory,
         private JWTTokenManagerInterface $JWTTokenManager,
-    ) {
-    }
+    ) {}
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function signUp(SignUpRequestDTO $request): SignUpResponseDTO
     {
@@ -44,7 +44,7 @@ final readonly class AuthService implements AuthServiceInterface
         return new SignUpResponseDTO(
             userId: $user->id,
             email: $user->email,
-            token: $token
+            token: $token,
         );
     }
 }

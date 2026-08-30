@@ -13,8 +13,7 @@ final class ProductResponseDTO
         public string $name,
         public string $description,
         public int $price,
-    ) {
-    }
+    ) {}
 
     public static function create(Product $product): self
     {

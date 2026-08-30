@@ -10,13 +10,13 @@ use App\DTO\Response\ProductResponseDTO;
 use App\Entity\Product;
 use App\Repository\Interface\ProductRepositoryInterface;
 use App\Service\Interface\ProductServiceInterface;
+use Throwable;
 
 final readonly class ProductService implements ProductServiceInterface
 {
     public function __construct(
         private ProductRepositoryInterface $productRepository,
-    ) {
-    }
+    ) {}
 
     public function getOne(int $productId): ProductResponseDTO
     {
@@ -26,7 +26,7 @@ final readonly class ProductService implements ProductServiceInterface
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function create(ProductRequestDTO $request): ProductResponseDTO
     {
@@ -45,7 +45,7 @@ final readonly class ProductService implements ProductServiceInterface
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function update(int $productId, UpdateProductRequestDTO $request): ProductResponseDTO
     {

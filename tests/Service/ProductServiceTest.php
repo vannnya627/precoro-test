@@ -14,6 +14,8 @@ use App\Service\ProductService;
 use App\Tests\AbstractTestCase;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionException;
+use Throwable;
 
 #[AllowMockObjectsWithoutExpectations]
 class ProductServiceTest extends AbstractTestCase
@@ -28,7 +30,7 @@ class ProductServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function testGetOne(): void
     {
@@ -58,7 +60,7 @@ class ProductServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function testGetAll(): void
     {
@@ -91,15 +93,15 @@ class ProductServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testCreate(): void
     {
         $request = new ProductRequestDTO(
             name: 'name',
             description: 'description',
-            price: 123
+            price: 123,
         );
 
         $this->productRepository->expects($this->once())
@@ -121,14 +123,14 @@ class ProductServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testUpdate(): void
     {
         $request = new UpdateProductRequestDTO(
             name: 'new-name',
-            price: 321
+            price: 321,
         );
 
         $product = $this->createProduct();
@@ -155,7 +157,7 @@ class ProductServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function testUpdateWhenThrowsExceptionProductNotFound(): void
     {
@@ -175,8 +177,8 @@ class ProductServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testDelete(): void
     {
@@ -196,8 +198,8 @@ class ProductServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Throwable
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function testDeleteWhenThrowsExceptionProductNotFound(): void
     {
@@ -216,7 +218,7 @@ class ProductServiceTest extends AbstractTestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function createProduct(): Product
     {

@@ -8,6 +8,8 @@ use App\Repository\CartRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use DateTimeImmutable;
+use InvalidArgumentException;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: CartRepository::class)]
@@ -23,10 +25,10 @@ final class Cart
     public private(set) User $user;
 
     #[ORM\Column]
-    public private(set) ?\DateTimeImmutable $createdAt = null;
+    public private(set) ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
-    public private(set) ?\DateTimeImmutable $updatedAt = null;
+    public private(set) ?DateTimeImmutable $updatedAt = null;
 
     /**
      * @var Collection<int, CartItem>
@@ -36,7 +38,7 @@ final class Cart
         mappedBy: 'cart',
         cascade: ['persist', 'remove'],
         fetch: 'EXTRA_LAZY',
-        orphanRemoval: true
+        orphanRemoval: true,
     )]
     public private(set) Collection $cartItems;
 
@@ -56,14 +58,14 @@ final class Cart
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     #[ORM\PreUpdate]
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     private function addCartItem(CartItem $cartItem): void
@@ -94,7 +96,7 @@ final class Cart
     public function addItem(Product $product, int $quantity): static
     {
         if ($quantity <= 0) {
-            throw new \InvalidArgumentException('Кількість не може дорівнювати нулю');
+            throw new InvalidArgumentException('Кількість не може дорівнювати нулю');
         }
 
         $existingItem = $this->getItemForProduct($product);

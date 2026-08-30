@@ -21,8 +21,7 @@ final readonly class JwtAuthenticationFailureListener
     public function __construct(
         private ExceptionResponseFactory $exceptionFactory,
         private bool $isDebug,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws ExceptionInterface
@@ -49,7 +48,7 @@ final readonly class JwtAuthenticationFailureListener
             title: $title,
             detail: $detail,
             context: [] === $context ? null : $context,
-            trace: $trace
+            trace: $trace,
         );
 
         $event->setResponse($response);

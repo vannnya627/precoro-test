@@ -10,8 +10,7 @@ final readonly class ExceptionMappingDTO
         public private(set) string $type,
         public private(set) int $code,
         public private(set) bool $loggable,
-    ) {
-    }
+    ) {}
 
     public static function fromTypeAndCode(string $type, int $code): self
     {
