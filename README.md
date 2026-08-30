@@ -57,3 +57,7 @@ docker compose exec php-fpm ./vendor/bin/php-cs-fixer fix
 ```
 docker compose exec php-fpm ./vendor/bin/phpstan analyze --memory-limit 256M
 ```
+### Rector:
+```
+docker compose exec php-fpm vendor/bin/rector process --dry-run
+```
