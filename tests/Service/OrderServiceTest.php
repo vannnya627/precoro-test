@@ -55,9 +55,9 @@ class OrderServiceTest extends AbstractTestCase
         $this->orderRepository->expects($this->once())
             ->method('save')
             ->willReturnCallback(function (Order $savedOrder) use ($user) {
-                $this->assertSame($user, $savedOrder->getUser());
-                $this->assertEquals(246, $savedOrder->getTotalPrice());
-                $this->assertCount(1, $savedOrder->getOrderItems());
+                $this->assertSame($user, $savedOrder->user);
+                $this->assertEquals(246, $savedOrder->totalPrice);
+                $this->assertCount(1, $savedOrder->orderItems);
 
                 $this->setEntityId($savedOrder, 99);
             });

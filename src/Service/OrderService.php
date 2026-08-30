@@ -43,7 +43,7 @@ final readonly class OrderService implements OrderServiceInterface
         $this->orderRepository->commit();
 
         $orderItemsDTO = array_values(
-            $order->getOrderItems()->map(fn(OrderItem $orderItem): OrderItemResponseDTO => OrderItemResponseDTO::create($orderItem))->toArray(),
+            $order->orderItems->map(fn(OrderItem $orderItem): OrderItemResponseDTO => OrderItemResponseDTO::create($orderItem))->toArray(),
         );
 
         return $this->mapToOrderDTO($order, $orderItemsDTO);
@@ -59,7 +59,7 @@ final readonly class OrderService implements OrderServiceInterface
         $result = [];
         foreach ($orders as $order) {
             $orderItemsDTO = [];
-            foreach ($order->getOrderItems() as $orderItem) {
+            foreach ($order->orderItems as $orderItem) {
                 $orderItemsDTO[] = OrderItemResponseDTO::create($orderItem);
             }
 
@@ -75,9 +75,9 @@ final readonly class OrderService implements OrderServiceInterface
     private function mapToOrderDTO(Order $order, array $orderItemsDTO): OrderResponseDTO
     {
         return new OrderResponseDTO(
-            id: $order->getId(),
-            totalPrice: $order->getTotalPrice(),
-            status: $order->getStatus()->value,
+            id: $order->id,
+            totalPrice: $order->totalPrice,
+            status: $order->status->value,
             orderItems: $orderItemsDTO,
         );
     }

@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use DateTimeImmutable;
+use InvalidArgumentException;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -19,23 +20,30 @@ final class Order
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    public private(set) int $id;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orders')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    public private(set) ?User $user = null;
 
     #[ORM\Column(nullable: false)]
-    private int $totalPrice;
+    public private(set) int $totalPrice {
+        set(int $value) {
+            if ($value < 0) {
+                throw new InvalidArgumentException("Загальна вартість не може бути від'ємною");
+            }
+            $this->totalPrice = $value;
+        }
+    }
 
     #[ORM\Column(enumType: OrderStatus::class)]
-    private OrderStatus $status = OrderStatus::NEW;
+    public private(set) OrderStatus $status = OrderStatus::NEW;
 
     #[ORM\Column]
-    private ?DateTimeImmutable $createdAt = null;
+    public private(set) ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
-    private ?DateTimeImmutable $updatedAt = null;
+    public private(set) ?DateTimeImmutable $updatedAt = null;
 
     /**
      * @var Collection<int, OrderItem>
@@ -46,41 +54,11 @@ final class Order
         cascade: ['persist', 'remove'],
         orphanRemoval: true,
     )]
-    private Collection $orderItems;
+    public private(set) Collection $orderItems;
 
     private function __construct()
     {
         $this->orderItems = new ArrayCollection();
-    }
-
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function getTotalPrice(): int
-    {
-        return $this->totalPrice;
-    }
-
-    public function getStatus(): OrderStatus
-    {
-        return $this->status;
-    }
-
-    public function getCreatedAt(): ?DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function getUpdatedAt(): ?DateTimeImmutable
-    {
-        return $this->updatedAt;
     }
 
     #[ORM\PrePersist]
@@ -96,14 +74,6 @@ final class Order
         $this->updatedAt = new DateTimeImmutable();
     }
 
-    /**
-     * @return Collection<int, OrderItem>
-     */
-    public function getOrderItems(): Collection
-    {
-        return $this->orderItems;
-    }
-
     public function removeOrderItem(OrderItem $orderItem): static
     {
         $this->orderItems->removeElement($orderItem);
@@ -113,10 +83,11 @@ final class Order
 
     private function recalculateTotalPrice(): void
     {
-        $this->totalPrice = 0;
+        $total = 0;
         foreach ($this->orderItems as $item) {
-            $this->totalPrice += $item->price * $item->quantity;
+            $total += $item->price * $item->quantity;
         }
+        $this->totalPrice = $total;
     }
 
     public static function create(User $user): static
