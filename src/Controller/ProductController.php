@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Attribute\RateLimiter;
 use App\DTO\Error\ErrorResponseDTO;
 use App\DTO\Request\ProductRequestDTO;
 use App\DTO\Request\UpdateProductRequestDTO;
@@ -17,6 +18,7 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Tag('ProductController')]
+#[RateLimiter]
 final class ProductController extends AbstractController
 {
     public function __construct(

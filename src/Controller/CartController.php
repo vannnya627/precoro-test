@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Attribute\RateLimiter;
 use App\DTO\Error\ErrorResponseDTO;
 use App\DTO\Request\AddItemRequestDTO;
 use App\DTO\Response\ProductResponseDTO;
@@ -18,6 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Tag('CartController')]
+#[RateLimiter(policy: 'jwt')]
 final class CartController extends AbstractController
 {
     public function __construct(

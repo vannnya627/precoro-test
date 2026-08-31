@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Attribute\RateLimiter;
 use App\DTO\Error\ErrorResponseDTO;
 use App\DTO\Request\SignUpRequestDTO;
 use App\DTO\Response\SignUpResponseDTO;
@@ -48,6 +49,7 @@ final class AuthController extends AbstractController
         content: new OA\JsonContent(ref: new Model(type: SignUpRequestDTO::class)),
     )]
     #[Route('/api/v1/auth/signUp', name: 'signUp', methods: ['POST'])]
+    #[RateLimiter(policy: 'auth')]
     public function signUp(#[MapRequestPayload] SignUpRequestDTO $request): JsonResponse
     {
         return $this->json($this->authService->signUp($request), 201);
@@ -88,6 +90,6 @@ final class AuthController extends AbstractController
             ],
         ),
     )]
-    #[Route('/api/v1/auth/login', name: 'api_login', methods: ['POST'])]
+    #[Route('/api/v1/auth/login', name: 'login', methods: ['POST'])]
     public function login(): void {}
 }

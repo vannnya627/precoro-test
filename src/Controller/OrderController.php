@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Attribute\RateLimiter;
 use App\DTO\Error\ErrorResponseDTO;
 use App\DTO\Response\OrderResponseDTO;
 use App\Entity\User;
@@ -16,6 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[OA\Tag('OrderController')]
+#[RateLimiter(policy: 'jwt')]
 final class OrderController extends AbstractController
 {
     public function __construct(

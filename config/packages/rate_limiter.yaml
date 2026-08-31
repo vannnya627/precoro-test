@@ -1,0 +1,14 @@
+framework:
+    rate_limiter:
+        auth:
+            policy: 'fixed_window'
+            limit: 5
+            interval: '1 minute'
+        jwt:
+            policy: 'sliding_window'
+            limit: 120
+            interval: '1 minute'
+        non_jwt:
+            policy: 'sliding_window'
+            limit: 100
+            interval: '1 minute'
