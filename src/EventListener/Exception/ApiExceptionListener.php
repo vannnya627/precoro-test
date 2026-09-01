@@ -24,7 +24,7 @@ final readonly class ApiExceptionListener
         private ExceptionMappingResolver $resolver,
         private LoggerInterface $logger,
         private ExceptionResponseFactory $exceptionFactory,
-        #[Autowire('%kernel.debug%')]
+        #[Autowire(param: 'kernel.debug')]
         private bool $isDebug,
     ) {}
 
@@ -42,11 +42,7 @@ final readonly class ApiExceptionListener
         $mapping = $this->resolver->resolve($exception::class);
         $mapping ??= ExceptionMappingDTO::fromTypeAndCode(self::FALLBACK_TYPE, Response::HTTP_INTERNAL_SERVER_ERROR);
 
-        $type = $mapping->type;
         $statusCode = $mapping->code;
-        $title = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
-        $detail = ($this->isDebug || $statusCode < Response::HTTP_INTERNAL_SERVER_ERROR) ? $exception->getMessage() : 'An unexpected error occurred. Please try again later';
-
         $context = [];
         if ($exception instanceof ApiExceptionInterface) {
             $context = $exception->getContext();
@@ -63,10 +59,10 @@ final readonly class ApiExceptionListener
         $trace = $this->isDebug ? $exception->getTraceAsString() : null;
 
         $response = $this->exceptionFactory->create(
-            type: $type,
+            type: $mapping->type,
             statusCode: $statusCode,
-            title: $title,
-            detail: $detail,
+            title: Response::$statusTexts[$statusCode] ?? 'Unknown Error',
+            detail: ($this->isDebug || $statusCode < Response::HTTP_INTERNAL_SERVER_ERROR) ? $exception->getMessage() : 'An unexpected error occurred. Please try again later',
             context: [] === $context ? null : $context,
             trace: $trace,
         );

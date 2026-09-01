@@ -18,7 +18,7 @@ final class ExceptionMappingResolver
      * @param array<string, array{code: int,type: string, loggable?: bool}> $mappingsConfig
      */
     public function __construct(
-        #[Autowire('%exceptions%')]
+        #[Autowire(param: 'exceptions')]
         array $mappingsConfig,
     ) {
         foreach ($mappingsConfig as $class => $mapping) {

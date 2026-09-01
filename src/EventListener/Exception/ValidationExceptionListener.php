@@ -18,7 +18,7 @@ final readonly class ValidationExceptionListener
 {
     public function __construct(
         private ExceptionResponseFactory $exceptionFactory,
-        #[Autowire('%kernel.debug%')]
+        #[Autowire(param: 'kernel.debug')]
         private bool $isDebug,
     ) {}
 
@@ -51,20 +51,15 @@ final readonly class ValidationExceptionListener
             $context[$violation->getPropertyPath()][] = (string) $violation->getMessage();
         }
 
-        $type = 'validation-error';
         $statusCode = Response::HTTP_UNPROCESSABLE_ENTITY;
-        $title = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
-
-        $detail = 'The provided data is invalid. Please check the "errors" property for more details.';
-        $trace = $this->isDebug ? $exception->getTraceAsString() : null;
 
         $response = $this->exceptionFactory->create(
-            type: $type,
+            type: 'validation-error',
             statusCode: $statusCode,
-            title: $title,
-            detail: $detail,
+            title: Response::$statusTexts[$statusCode] ?? 'Unknown Error',
+            detail: 'The provided data is invalid. Please check the "errors" property for more details.',
             context: empty($context) ? null : $context,
-            trace: $trace,
+            trace: $this->isDebug ? $exception->getTraceAsString() : null,
         );
 
         $event->setResponse($response);

@@ -17,7 +17,7 @@ final readonly class HttpExceptionListener
 {
     public function __construct(
         private ExceptionResponseFactory $exceptionFactory,
-        #[Autowire('%kernel.debug%')]
+        #[Autowire(param: 'kernel.debug')]
         private bool $isDebug,
     ) {}
 
@@ -32,18 +32,14 @@ final readonly class HttpExceptionListener
             return;
         }
 
-        $type = 'http-exception';
         $statusCode = $exception->getStatusCode();
-        $title = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
-        $detail = $exception->getMessage();
-        $trace = $this->isDebug ? $exception->getTraceAsString() : null;
 
         $response = $this->exceptionFactory->create(
-            type: $type,
+            type: 'http-exception',
             statusCode: $statusCode,
-            title: $title,
-            detail: $detail,
-            trace: $trace,
+            title: Response::$statusTexts[$statusCode] ?? 'Unknown Error',
+            detail: $exception->getMessage(),
+            trace: $this->isDebug ? $exception->getTraceAsString() : null,
         );
 
         $response->headers->add($exception->getHeaders());

@@ -22,7 +22,7 @@ final readonly class JwtAuthenticationFailureListener
 {
     public function __construct(
         private ExceptionResponseFactory $exceptionFactory,
-        #[Autowire('%kernel.debug%')]
+        #[Autowire(param: 'kernel.debug')]
         private bool $isDebug,
     ) {}
 
@@ -51,22 +51,18 @@ final readonly class JwtAuthenticationFailureListener
             ],
         };
 
-        $title = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
-
         $context = [];
         if ($exception instanceof ApiExceptionInterface) {
             $context = $exception->getContext();
         }
 
-        $trace = $this->isDebug ? $exception->getTraceAsString() : null;
-
         $response = $this->exceptionFactory->create(
             type: $type,
             statusCode: $statusCode,
-            title: $title,
+            title: Response::$statusTexts[$statusCode] ?? 'Unknown Error',
             detail: $detail,
             context: [] === $context ? null : $context,
-            trace: $trace,
+            trace: $this->isDebug ? $exception->getTraceAsString() : null,
         );
 
         $event->setResponse($response);
