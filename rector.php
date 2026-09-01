@@ -13,7 +13,6 @@ return RectorConfig::configure()
     ])
     ->withPhpSets(php85: true)
     ->withPreparedSets(
-        deadCode: true,
         codeQuality: true,
         codingStyle: true,
     )
