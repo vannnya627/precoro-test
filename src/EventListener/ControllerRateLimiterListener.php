@@ -2,25 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Listener;
+namespace App\EventListener;
 
 use App\Attribute\RateLimiter;
 use App\Factory\ExceptionResponseFactory;
+use App\RateLimiter\RateLimiterRegistry;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\RateLimiter\LimiterInterface;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 final readonly class ControllerRateLimiterListener
 {
     public function __construct(
-        private RateLimiterFactory $authLimiter,
-        private RateLimiterFactory $nonJwtLimiter,
-        private RateLimiterFactory $jwtLimiter,
+        private RateLimiterRegistry $rateLimiterRegistry,
         private ExceptionResponseFactory $exceptionFactory,
     ) {}
 
@@ -40,22 +36,17 @@ final readonly class ControllerRateLimiterListener
         $rateLimiterAttribute = $attributes[0];
 
 
-        $limiter = $this->getLimiter(policy: $rateLimiterAttribute->policy, request: $event->getRequest());
+        $limiter = $this->rateLimiterRegistry->getLimiter(policy: $rateLimiterAttribute->policy, request: $event->getRequest());
 
         $limit = $limiter->consume();
 
         if (!$limit->isAccepted()) {
-
-            $type = 'too-many-requests';
             $statusCode = Response::HTTP_TOO_MANY_REQUESTS;
-            $title = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
-            $detail = 'Too many requests, please try again later.';
-
             $response = $this->exceptionFactory->create(
-                type: $type,
+                type: 'too-many-requests',
                 statusCode: $statusCode,
-                title: $title,
-                detail: $detail,
+                title: Response::$statusTexts[$statusCode] ?? 'Unknown Error',
+                detail: 'Too many requests, please try again later.',
             );
 
             $secondsToRetry = $limit->getRetryAfter()->getTimestamp() - time();
@@ -64,14 +55,5 @@ final readonly class ControllerRateLimiterListener
 
             $event->setController(static fn() => $response);
         }
-    }
-
-    private function getLimiter(string $policy, Request $request): LimiterInterface
-    {
-        return match ($policy) {
-            'auth' => $this->authLimiter->create((string) $request->getClientIp()),
-            'jwt' => $this->jwtLimiter->create(md5(substr((string) $request->headers->get('Authorization'), 7) ?: (string) $request->getClientIp())),
-            default => $this->nonJwtLimiter->create((string) $request->getClientIp()),
-        };
     }
 }
