@@ -7,6 +7,7 @@ namespace App\EventListener\Security;
 use App\Exception\ApiExceptionInterface;
 use App\Factory\ExceptionResponseFactory;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationFailureEvent;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
@@ -21,6 +22,7 @@ final readonly class JwtAuthenticationFailureListener
 {
     public function __construct(
         private ExceptionResponseFactory $exceptionFactory,
+        #[Autowire('%kernel.debug%')]
         private bool $isDebug,
     ) {}
 

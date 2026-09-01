@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ExceptionHandler;
 
 use InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class ExceptionMappingResolver
 {
@@ -14,11 +15,13 @@ final class ExceptionMappingResolver
     private array $mappings = [];
 
     /**
-     * @param array<string, array{code: int,type: string, loggable?: bool}> $mappings
+     * @param array<string, array{code: int,type: string, loggable?: bool}> $mappingsConfig
      */
-    public function __construct(array $mappings)
-    {
-        foreach ($mappings as $class => $mapping) {
+    public function __construct(
+        #[Autowire('%exceptions%')]
+        array $mappingsConfig,
+    ) {
+        foreach ($mappingsConfig as $class => $mapping) {
             if (empty($mapping['code'])) {
                 throw new InvalidArgumentException('Missing mapping code');
             }

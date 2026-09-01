@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\EventListener\Exception;
 
 use App\Factory\ExceptionResponseFactory;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -16,6 +17,7 @@ final readonly class HttpExceptionListener
 {
     public function __construct(
         private ExceptionResponseFactory $exceptionFactory,
+        #[Autowire('%kernel.debug%')]
         private bool $isDebug,
     ) {}
 

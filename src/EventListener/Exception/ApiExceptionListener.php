@@ -9,6 +9,7 @@ use App\ExceptionHandler\ExceptionMappingDTO;
 use App\ExceptionHandler\ExceptionMappingResolver;
 use App\Factory\ExceptionResponseFactory;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -23,6 +24,7 @@ final readonly class ApiExceptionListener
         private ExceptionMappingResolver $resolver,
         private LoggerInterface $logger,
         private ExceptionResponseFactory $exceptionFactory,
+        #[Autowire('%kernel.debug%')]
         private bool $isDebug,
     ) {}
 
