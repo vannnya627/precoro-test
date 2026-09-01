@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Listener\Exception;
+namespace App\EventListener\Security;
 
 use App\Exception\ApiExceptionInterface;
 use App\Factory\ExceptionResponseFactory;
@@ -10,6 +10,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationFailureEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
+use Symfony\Component\Security\Core\Exception\TooManyLoginAttemptsAuthenticationException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 #[AsEventListener(event: 'lexik_jwt_authentication.on_authentication_failure', priority: 5)]
@@ -30,8 +31,24 @@ final readonly class JwtAuthenticationFailureListener
     {
         $exception = $event->getException();
 
-        $type = $exception instanceof BadCredentialsException ? 'invalid-credentials' : 'jwt-error';
-        $statusCode = Response::HTTP_UNAUTHORIZED;
+        [$type, $statusCode, $detail] = match (true) {
+            $exception instanceof TooManyLoginAttemptsAuthenticationException => [
+                'too-many-requests',
+                Response::HTTP_TOO_MANY_REQUESTS,
+                'Забагато невдалих спроб входу. Будь ласка, спробуйте пізніше.',
+            ],
+            $exception instanceof BadCredentialsException => [
+                'invalid-credentials',
+                Response::HTTP_UNAUTHORIZED,
+                'Невірний логін або пароль.',
+            ],
+            default => [
+                'jwt-error',
+                Response::HTTP_UNAUTHORIZED,
+                $exception->getMessageKey(),
+            ],
+        };
+
         $title = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
 
         $context = [];
@@ -39,7 +56,6 @@ final readonly class JwtAuthenticationFailureListener
             $context = $exception->getContext();
         }
 
-        $detail = $exception->getMessageKey();
         $trace = $this->isDebug ? $exception->getTraceAsString() : null;
 
         $response = $this->exceptionFactory->create(

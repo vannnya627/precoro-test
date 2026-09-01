@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Listener\Exception;
+namespace App\EventListener\Exception;
 
 use App\Exception\ApiExceptionInterface;
 use App\ExceptionHandler\ExceptionMappingDTO;

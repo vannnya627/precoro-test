@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Listener\Exception;
+namespace App\EventListener\Exception;
 
 use App\Factory\ExceptionResponseFactory;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
