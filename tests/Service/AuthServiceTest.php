@@ -14,9 +14,9 @@ use App\Tests\AbstractTestCase;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionException;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 use Symfony\Component\PasswordHasher\PasswordHasherInterface;
-use ReflectionException;
 use Throwable;
 
 #[AllowMockObjectsWithoutExpectations]
@@ -50,7 +50,7 @@ class AuthServiceTest extends AbstractTestCase
         $this->userRepository->expects($this->once())
             ->method('existByEmail')
             ->with($request->email)
-            ->willReturn(null);
+            ->willReturn(false);
 
         $hasherMock = $this->createStub(PasswordHasherInterface::class);
         $this->passwordHasherFactory->expects($this->once())
@@ -101,7 +101,7 @@ class AuthServiceTest extends AbstractTestCase
         $this->userRepository->expects($this->once())
             ->method('existByEmail')
             ->with($request->email)
-            ->willReturn($user);
+            ->willReturn(true);
 
         $this->passwordHasherFactory->expects($this->never())
             ->method('getPasswordHasher');

@@ -11,6 +11,7 @@ use App\Entity\User;
 use App\Exception\EmptyCartException;
 use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\OrderRepositoryInterface;
+use App\Repository\Interface\UserRepositoryInterface;
 use App\Service\OrderService;
 use App\Tests\AbstractTestCase;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -23,13 +24,15 @@ class OrderServiceTest extends AbstractTestCase
 {
     private OrderRepositoryInterface|MockObject $orderRepository;
     private CartRepositoryInterface|MockObject $cartRepository;
+    private UserRepositoryInterface|MockObject $userRepository;
     private OrderService $orderService;
 
     protected function setUp(): void
     {
         $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
         $this->cartRepository = $this->createMock(CartRepositoryInterface::class);
-        $this->orderService = new OrderService($this->orderRepository, $this->cartRepository);
+        $this->userRepository = $this->createMock(UserRepositoryInterface::class);
+        $this->orderService = new OrderService($this->orderRepository, $this->cartRepository, $this->userRepository);
     }
 
     /**
@@ -46,6 +49,11 @@ class OrderServiceTest extends AbstractTestCase
         $product = $this->createProduct();
 
         $cart->addItem($product, 2);
+
+        $this->userRepository->expects($this->once())
+            ->method('getByEmail')
+            ->with($user->email)
+            ->willReturn($user);
 
         $this->cartRepository->expects($this->once())
             ->method('findCartWithItemsAndProducts')
@@ -73,7 +81,7 @@ class OrderServiceTest extends AbstractTestCase
         $this->orderRepository->expects($this->once())
             ->method('commit');
 
-        $response = $this->orderService->create($user);
+        $response = $this->orderService->create($user->email);
 
         $this->assertEquals(99, $response->id);
         $this->assertEquals(246, $response->totalPrice);
@@ -91,6 +99,12 @@ class OrderServiceTest extends AbstractTestCase
 
         $cart = $this->createCart($user);
         $user->addCart($cart);
+
+        $this->userRepository->expects($this->once())
+            ->method('getByEmail')
+            ->with($user->email)
+            ->willReturn($user);
+
         $this->cartRepository->expects($this->once())
             ->method('findCartWithItemsAndProducts')
             ->with($user)
@@ -106,7 +120,7 @@ class OrderServiceTest extends AbstractTestCase
             ->method('commit');
 
         $this->expectException(EmptyCartException::class);
-        $this->orderService->create($user);
+        $this->orderService->create($user->email);
     }
 
     /**
@@ -128,12 +142,17 @@ class OrderServiceTest extends AbstractTestCase
 
         $order->addItemsFromCart($cart->cartItems);
 
+        $this->userRepository->expects($this->once())
+            ->method('getByEmail')
+            ->with($user->email)
+            ->willReturn($user);
+
         $this->orderRepository->expects($this->once())
             ->method('findAllByUserIdWithProduct')
             ->with($user->id)
             ->willReturn([$order]);
 
-        $response = $this->orderService->getList($user);
+        $response = $this->orderService->getList($user->email);
 
         $this->assertCount(1, $response);
 
@@ -154,12 +173,18 @@ class OrderServiceTest extends AbstractTestCase
     public function testGetListWhenUserHasNoOrders(): void
     {
         $user = $this->createUser();
+
+        $this->userRepository->expects($this->once())
+            ->method('getByEmail')
+            ->with($user->email)
+            ->willReturn($user);
+
         $this->orderRepository->expects($this->once())
             ->method('findAllByUserIdWithProduct')
             ->with($user->id)
             ->willReturn([]);
 
-        $response = $this->orderService->getList($user);
+        $response = $this->orderService->getList($user->email);
 
         $this->assertEquals([], $response);
     }

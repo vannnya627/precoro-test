@@ -6,14 +6,13 @@ namespace App\Controller\Cart;
 
 use App\Attribute\RateLimiter;
 use App\DTO\Response\ProductResponseDTO;
-use App\Entity\User;
 use App\Service\CartService;
 use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use OpenApi\Attributes as OA;
 
 #[OA\Tag('CartController')]
 #[RateLimiter(policy: 'jwt')]
@@ -47,8 +46,13 @@ final class GetCartItemsAction extends AbstractController
             ],
         ),
     )]
-    public function __invoke(#[CurrentUser] User $user): JsonResponse
+    public function __invoke(): JsonResponse
     {
-        return $this->json(['data' => $this->cartService->getList($user)]);
+        $email = $this->getUser()?->getUserIdentifier();
+        if (!$email) {
+            throw new UnauthorizedHttpException('Bearer', 'Користувач не авторизований');
+        }
+
+        return $this->json(['data' => $this->cartService->getList($email)]);
     }
 }

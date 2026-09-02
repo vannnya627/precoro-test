@@ -8,19 +8,21 @@ use App\DTO\Request\AddItemRequestDTO;
 use App\DTO\Response\CartItemResponseDTO;
 use App\Entity\Cart;
 use App\Entity\CartItem;
-use App\Entity\User;
 use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\ProductRepositoryInterface;
+use App\Repository\Interface\UserRepositoryInterface;
 
 final readonly class CartService
 {
     public function __construct(
         private CartRepositoryInterface $cartRepository,
         private ProductRepositoryInterface $productRepository,
+        private UserRepositoryInterface $userRepository,
     ) {}
 
-    public function addItem(AddItemRequestDTO $request, User $user): void
+    public function addItem(AddItemRequestDTO $request, string $email): void
     {
+        $user = $this->userRepository->getByEmail($email);
         $product = $this->productRepository->getById($request->productId);
 
         $cart = $user->cart;
@@ -38,8 +40,9 @@ final readonly class CartService
     /**
      * @return list<CartItemResponseDTO>
      */
-    public function getList(User $user): array
+    public function getList(string $email): array
     {
+        $user = $this->userRepository->getByEmail($email);
         $cart = $this->cartRepository->findCartWithItemsAndProducts($user);
 
         if (null === $cart || $cart->cartItems->isEmpty()) {

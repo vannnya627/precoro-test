@@ -7,14 +7,14 @@ namespace App\Controller\Order;
 use App\Attribute\RateLimiter;
 use App\DTO\Error\ErrorResponseDTO;
 use App\DTO\Response\OrderResponseDTO;
-use App\Entity\User;
 use App\Service\OrderService;
 use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use OpenApi\Attributes as OA;
+use Throwable;
 
 #[OA\Tag('OrderController')]
 #[RateLimiter(policy: 'jwt')]
@@ -23,6 +23,9 @@ final class CreateOrderAction extends AbstractController
 {
     public function __construct(private readonly OrderService $orderService) {}
 
+    /**
+     * @throws Throwable
+     */
     #[OA\Post(
         operationId: 'api_create_order',
         description: 'Створення замовлення на основі товарі у кошику певного користувача',
@@ -48,8 +51,13 @@ final class CreateOrderAction extends AbstractController
             ],
         ),
     )]
-    public function __invoke(#[CurrentUser] User $user): JsonResponse
+    public function __invoke(): JsonResponse
     {
-        return $this->json($this->orderService->create($user));
+        $email = $this->getUser()?->getUserIdentifier();
+        if (!$email) {
+            throw new UnauthorizedHttpException('Bearer', 'Користувач не авторизований');
+        }
+
+        return $this->json($this->orderService->create($email));
     }
 }

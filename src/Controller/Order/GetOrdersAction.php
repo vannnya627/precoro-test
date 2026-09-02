@@ -6,14 +6,13 @@ namespace App\Controller\Order;
 
 use App\Attribute\RateLimiter;
 use App\DTO\Response\OrderResponseDTO;
-use App\Entity\User;
 use App\Service\OrderService;
 use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use OpenApi\Attributes as OA;
 
 #[OA\Tag('OrderController')]
 #[RateLimiter(policy: 'jwt')]
@@ -47,8 +46,13 @@ final class GetOrdersAction extends AbstractController
             ],
         ),
     )]
-    public function __invoke(#[CurrentUser] User $user): JsonResponse
+    public function __invoke(): JsonResponse
     {
-        return $this->json(['data' => $this->orderService->getList($user)]);
+        $email = $this->getUser()?->getUserIdentifier();
+        if (!$email) {
+            throw new UnauthorizedHttpException('Bearer', 'Користувач не авторизований');
+        }
+
+        return $this->json(['data' => $this->orderService->getList($email)]);
     }
 }

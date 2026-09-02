@@ -8,10 +8,10 @@ use App\DTO\Response\OrderItemResponseDTO;
 use App\DTO\Response\OrderResponseDTO;
 use App\Entity\Order;
 use App\Entity\OrderItem;
-use App\Entity\User;
 use App\Exception\EmptyCartException;
 use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\OrderRepositoryInterface;
+use App\Repository\Interface\UserRepositoryInterface;
 use Throwable;
 
 final readonly class OrderService
@@ -19,13 +19,15 @@ final readonly class OrderService
     public function __construct(
         private OrderRepositoryInterface $orderRepository,
         private CartRepositoryInterface $cartRepository,
+        private UserRepositoryInterface $userRepository,
     ) {}
 
     /**
      * @throws Throwable
      */
-    public function create(User $user): OrderResponseDTO
+    public function create(string $email): OrderResponseDTO
     {
+        $user = $this->userRepository->getByEmail($email);
         $cart = $this->cartRepository->findCartWithItemsAndProducts($user);
 
         if (null === $cart || $cart->cartItems->isEmpty()) {
@@ -51,8 +53,9 @@ final readonly class OrderService
     /**
      * @return list<OrderResponseDTO>
      */
-    public function getList(User $user): array
+    public function getList(string $email): array
     {
+        $user = $this->userRepository->getByEmail($email);
         $orders = $this->orderRepository->findAllByUserIdWithProduct($user->id);
 
         $result = [];

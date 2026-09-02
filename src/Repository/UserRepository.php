@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Exception\UserNotFoundException;
 use App\Repository\Interface\UserRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -38,8 +39,13 @@ final class UserRepository extends ServiceEntityRepository implements PasswordUp
         $this->getEntityManager()->flush();
     }
 
-    public function existByEmail(string $email): ?User
+    public function existByEmail(string $email): bool
     {
-        return $this->findOneBy(['email' => $email]);
+        return $this->count(['email' => $email]) > 0;
+    }
+
+    public function getByEmail(string $email): User
+    {
+        return $this->findOneBy(['email' => $email]) ?? throw new UserNotFoundException($email);
     }
 }
