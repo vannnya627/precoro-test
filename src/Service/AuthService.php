@@ -9,12 +9,11 @@ use App\DTO\Response\SignUpResponseDTO;
 use App\Entity\User;
 use App\Exception\UserAlreadyExistsException;
 use App\Repository\Interface\UserRepositoryInterface;
-use App\Service\Interface\AuthServiceInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 use Throwable;
 
-final readonly class AuthService implements AuthServiceInterface
+final readonly class AuthService
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,

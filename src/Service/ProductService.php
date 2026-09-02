@@ -9,10 +9,9 @@ use App\DTO\Request\UpdateProductRequestDTO;
 use App\DTO\Response\ProductResponseDTO;
 use App\Entity\Product;
 use App\Repository\Interface\ProductRepositoryInterface;
-use App\Service\Interface\ProductServiceInterface;
 use Throwable;
 
-final readonly class ProductService implements ProductServiceInterface
+final readonly class ProductService
 {
     public function __construct(
         private ProductRepositoryInterface $productRepository,

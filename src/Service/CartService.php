@@ -11,9 +11,8 @@ use App\Entity\CartItem;
 use App\Entity\User;
 use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\ProductRepositoryInterface;
-use App\Service\Interface\CartServiceInterface;
 
-final readonly class CartService implements CartServiceInterface
+final readonly class CartService
 {
     public function __construct(
         private CartRepositoryInterface $cartRepository,
@@ -36,6 +35,9 @@ final readonly class CartService implements CartServiceInterface
         $this->cartRepository->saveAndCommit($cart);
     }
 
+    /**
+     * @return list<CartItemResponseDTO>
+     */
     public function getList(User $user): array
     {
         $cart = $this->cartRepository->findCartWithItemsAndProducts($user);

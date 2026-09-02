@@ -12,10 +12,9 @@ use App\Entity\User;
 use App\Exception\EmptyCartException;
 use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\OrderRepositoryInterface;
-use App\Service\Interface\OrderServiceInterface;
 use Throwable;
 
-final readonly class OrderService implements OrderServiceInterface
+final readonly class OrderService
 {
     public function __construct(
         private OrderRepositoryInterface $orderRepository,
