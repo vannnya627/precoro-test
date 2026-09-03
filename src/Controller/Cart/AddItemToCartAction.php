@@ -8,6 +8,7 @@ use App\Attribute\RateLimiter;
 use App\DTO\Error\ErrorResponseDTO;
 use App\DTO\Request\AddItemRequestDTO;
 use App\Service\CartService;
+use App\ValueObject\Email;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -58,12 +59,12 @@ final class AddItemToCartAction extends AbstractController
     )]
     public function __invoke(#[MapRequestPayload] AddItemRequestDTO $request): JsonResponse
     {
-        $email = $this->getUser()?->getUserIdentifier();
-        if (!$email) {
+        $emailStr = $this->getUser()?->getUserIdentifier();
+        if (!$emailStr) {
             throw new UnauthorizedHttpException('Bearer', 'Користувач не авторизований');
         }
 
-        $this->cartService->addItem($request, $email);
+        $this->cartService->addItem($request, Email::create($emailStr));
 
         return $this->json(['message' => 'item added success']);
     }

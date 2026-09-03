@@ -9,6 +9,7 @@ use App\DTO\Response\SignUpResponseDTO;
 use App\Entity\User;
 use App\Exception\UserAlreadyExistsException;
 use App\Repository\Interface\UserRepositoryInterface;
+use App\ValueObject\Email;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 use Throwable;
@@ -26,9 +27,9 @@ final readonly class AuthService
      */
     public function signUp(SignUpRequestDTO $request): SignUpResponseDTO
     {
-        $email = $request->email;
+        $email = Email::create($request->email);
         if ($this->userRepository->existByEmail($email)) {
-            throw new UserAlreadyExistsException($email);
+            throw new UserAlreadyExistsException($email->value);
         }
 
         $hasher = $this->passwordHasherFactory->getPasswordHasher(User::class);
@@ -42,7 +43,7 @@ final readonly class AuthService
 
         return new SignUpResponseDTO(
             userId: $user->id,
-            email: $user->email,
+            email: $user->email->value,
             token: $token,
         );
     }

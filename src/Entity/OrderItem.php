@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\ValueObject\Price;
+use App\ValueObject\Quantity;
 use Doctrine\ORM\Mapping as ORM;
-use InvalidArgumentException;
 
 #[ORM\Entity]
 final class OrderItem
@@ -23,25 +24,11 @@ final class OrderItem
     #[ORM\JoinColumn(nullable: false)]
     public private(set) Product $product;
 
-    #[ORM\Column(type: 'integer')]
-    public private(set) int $quantity = 1 {
-        set(int $value) {
-            if ($value < 1) {
-                throw new InvalidArgumentException('Кількість не може бути менша 1');
-            }
-            $this->quantity = $value;
-        }
-    }
+    #[ORM\Embedded(class: Quantity::class, columnPrefix: false)]
+    public private(set) Quantity $quantity;
 
-    #[ORM\Column(type: 'integer')]
-    public private(set) int $price {
-        set(int $value) {
-            if ($value < 0) {
-                throw new InvalidArgumentException('Ціна не може бути менша 0');
-            }
-            $this->price = $value;
-        }
-    }
+    #[ORM\Embedded(class: Price::class, columnPrefix: false)]
+    public private(set) Price $price;
 
     private function __construct() {}
 

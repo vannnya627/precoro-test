@@ -21,7 +21,7 @@ final class ProductResponseDTO
             id: $product->id,
             name: $product->name,
             description: $product->description,
-            price: $product->price,
+            price: $product->price->value,
         );
     }
 }

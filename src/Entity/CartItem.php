@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\ValueObject\Quantity;
 use Doctrine\ORM\Mapping as ORM;
-use InvalidArgumentException;
 
 #[ORM\Entity]
 final class CartItem
@@ -23,24 +23,17 @@ final class CartItem
     #[ORM\JoinColumn(nullable: false)]
     public private(set) Product $product;
 
-    #[ORM\Column(type: 'integer')]
-    public private(set) int $quantity = 1 {
-        set(int $value) {
-            if ($value < 1) {
-                throw new InvalidArgumentException('Кількість не може бути менша 1');
-            }
-            $this->quantity = $value;
-        }
-    }
+    #[ORM\Embedded(class: Quantity::class, columnPrefix: false)]
+    public private(set) Quantity $quantity;
 
     private function __construct() {}
 
-    public function addQuantity(int $quantity): void
+    public function addQuantity(Quantity $newQuantity): void
     {
-        $this->quantity += $quantity;
+        $this->quantity = $this->quantity->add($newQuantity);
     }
 
-    public static function create(Cart $cart, Product $product, int $quantity): static
+    public static function create(Cart $cart, Product $product, Quantity $quantity): static
     {
         $cartItem = new self();
         $cartItem->cart = $cart;

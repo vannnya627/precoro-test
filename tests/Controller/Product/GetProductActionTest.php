@@ -28,7 +28,7 @@ class GetProductActionTest extends AbstractWebTestCase
         $this->assertArrayHasKey('id', $responseContent);
         $this->assertEquals($product->id, $responseContent['id']);
         $this->assertEquals($product->name, $responseContent['name']);
-        $this->assertEquals($product->price, $responseContent['price']);
+        $this->assertEquals($product->price->value, $responseContent['price']);
     }
 
     public function testGetProductNotFound(): void

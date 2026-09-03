@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
+use App\ValueObject\Price;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use DateTimeImmutable;
@@ -39,15 +40,8 @@ final class Product
         }
     }
 
-    #[ORM\Column]
-    public private(set) int $price {
-        set(int $value) {
-            if ($value < 0) {
-                throw new InvalidArgumentException('Ціна не може бути менша 0');
-            }
-            $this->price = $value;
-        }
-    }
+    #[ORM\Embedded(class: Price::class, columnPrefix: false)]
+    public private(set) Price $price;
 
     #[ORM\Column]
     public private(set) ?DateTimeImmutable $createdAt = null;
@@ -70,7 +64,7 @@ final class Product
         $this->updatedAt = new DateTimeImmutable();
     }
 
-    public static function create(string $name, string $description, int $price): static
+    public static function create(string $name, string $description, Price $price): static
     {
         $product = new self();
         $product->name = $name;
@@ -80,7 +74,7 @@ final class Product
         return $product;
     }
 
-    public function update(?string $newName, ?string $newDescription, ?int $newPrice): void
+    public function update(?string $newName, ?string $newDescription, ?Price $newPrice): void
     {
         if (null !== $newName) {
             $this->name = $newName;

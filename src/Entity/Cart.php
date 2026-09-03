@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\CartRepository;
+use App\ValueObject\Quantity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use DateTimeImmutable;
-use InvalidArgumentException;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: CartRepository::class)]
@@ -93,12 +93,8 @@ final class Cart
         return null;
     }
 
-    public function addItem(Product $product, int $quantity): static
+    public function addItem(Product $product, Quantity $quantity): static
     {
-        if ($quantity <= 0) {
-            throw new InvalidArgumentException('Кількість не може дорівнювати нулю');
-        }
-
         $existingItem = $this->getItemForProduct($product);
 
         if (null !== $existingItem) {

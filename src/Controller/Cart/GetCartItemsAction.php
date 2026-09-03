@@ -7,6 +7,7 @@ namespace App\Controller\Cart;
 use App\Attribute\RateLimiter;
 use App\DTO\Response\ProductResponseDTO;
 use App\Service\CartService;
+use App\ValueObject\Email;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -48,11 +49,11 @@ final class GetCartItemsAction extends AbstractController
     )]
     public function __invoke(): JsonResponse
     {
-        $email = $this->getUser()?->getUserIdentifier();
-        if (!$email) {
+        $emailStr = $this->getUser()?->getUserIdentifier();
+        if (!$emailStr) {
             throw new UnauthorizedHttpException('Bearer', 'Користувач не авторизований');
         }
 
-        return $this->json(['data' => $this->cartService->getList($email)]);
+        return $this->json(['data' => $this->cartService->getList(Email::create($emailStr))]);
     }
 }

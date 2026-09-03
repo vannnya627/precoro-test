@@ -6,8 +6,6 @@ namespace App\Tests\Controller\Auth;
 
 use App\Entity\User;
 use App\Tests\AbstractWebTestCase;
-use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
 class SignUpActionTest extends AbstractWebTestCase
 {
@@ -47,7 +45,7 @@ class SignUpActionTest extends AbstractWebTestCase
         $this->assertArrayHasKey('token', $responseContent);
         $this->assertIsString($responseContent['token']);
 
-        $userInDb = $em->getRepository(User::class)->findOneBy(['email' => $payload['email']]);
+        $userInDb = $em->getRepository(User::class)->findOneBy(['email.value' => $payload['email']]);
         $this->assertNotNull($userInDb);
 
         $this->assertNotEquals($payload['password'], $userInDb->getPassword());
@@ -116,16 +114,4 @@ class SignUpActionTest extends AbstractWebTestCase
         $this->assertArrayHasKey('password', $responseContent['context']);
         $this->assertIsArray($responseContent['context']['password']);
     }
-
-    //    private function createUser(ObjectManager $em): void
-    //    {
-    //        $passwordHasherFactory = static::getContainer()->get(PasswordHasherFactoryInterface::class);
-    //        $hasher = $passwordHasherFactory->getPasswordHasher(User::class);
-    //        $passwordHash = $hasher->hash('password');
-    //
-    //        $user = User::createCustomer('test@test.com', $passwordHash);
-    //
-    //        $em->persist($user);
-    //        $em->flush();
-    //    }
 }

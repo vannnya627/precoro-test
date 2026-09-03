@@ -15,6 +15,9 @@ use App\Entity\Product;
 use App\Entity\User;
 use App\Exception\ProductNotFoundException;
 use App\Tests\AbstractTestCase;
+use App\ValueObject\Email;
+use App\ValueObject\Price;
+use App\ValueObject\Quantity;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionException;
@@ -65,7 +68,7 @@ class CartServiceTest extends AbstractTestCase
             ->with($productId)
             ->willReturn($product);
 
-        $cart->addItem($product, 1);
+        $cart->addItem($product, Quantity::create(1));
 
         $this->cartRepository->expects($this->once())
             ->method('saveAndCommit')
@@ -75,7 +78,7 @@ class CartServiceTest extends AbstractTestCase
 
         $updatedItem = $cart->cartItems->first();
 
-        $this->assertEquals(2, $updatedItem->quantity);
+        $this->assertEquals(2, $updatedItem->quantity->value);
     }
 
     /**
@@ -148,7 +151,7 @@ class CartServiceTest extends AbstractTestCase
 
         $addedItem = $cart->cartItems->first();
 
-        $this->assertEquals(1, $addedItem->quantity);
+        $this->assertEquals(1, $addedItem->quantity->value);
         $this->assertSame($product, $addedItem->product);
         $this->assertSame($cart, $addedItem->cart);
     }
@@ -196,7 +199,7 @@ class CartServiceTest extends AbstractTestCase
 
         $product = $this->createProduct();
 
-        $cart->addItem($product, 1);
+        $cart->addItem($product, Quantity::create(1));
 
         $this->userRepository->expects($this->once())
             ->method('getByEmail')
@@ -212,7 +215,7 @@ class CartServiceTest extends AbstractTestCase
             new CartItemResponseDTO(
                 productId: $product->id,
                 productName: $product->name,
-                quantity: $cart->cartItems->first()->quantity,
+                quantity: $cart->cartItems->first()->quantity->value,
             ),
         ];
 
@@ -251,7 +254,7 @@ class CartServiceTest extends AbstractTestCase
     private function createUser(): User
     {
         $userId = 1;
-        $user = User::createCustomer('test@gmail.com', 'dsgsfggdsgds');
+        $user = User::createCustomer(Email::create('test@gmail.com'), 'dsgsfggdsgds');
         $this->setEntityId($user, $userId);
 
         return $user;
@@ -263,7 +266,7 @@ class CartServiceTest extends AbstractTestCase
     private function createProduct(): Product
     {
         $productId = 1;
-        $product = Product::create('Test Product', 'Test Description', 100);
+        $product = Product::create('Test Product', 'Test Description', Price::create(100));
         $this->setEntityId($product, $productId);
 
         return $product;

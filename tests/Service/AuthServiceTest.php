@@ -11,6 +11,7 @@ use App\Exception\UserAlreadyExistsException;
 use App\Repository\Interface\UserRepositoryInterface;
 use App\Service\AuthService;
 use App\Tests\AbstractTestCase;
+use App\ValueObject\Email;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -47,9 +48,10 @@ class AuthServiceTest extends AbstractTestCase
 
         $passwordHash = 'gdfgergerer3r34t4gffrerhg';
 
+        $email = Email::create($request->email);
         $this->userRepository->expects($this->once())
             ->method('existByEmail')
-            ->with($request->email)
+            ->with($email)
             ->willReturn(false);
 
         $hasherMock = $this->createStub(PasswordHasherInterface::class);
@@ -58,12 +60,12 @@ class AuthServiceTest extends AbstractTestCase
             ->with(User::class)
             ->willReturn($hasherMock);
 
-        $user = $this->createUser($request->email, $passwordHash);
+        $user = $this->createUser($email, $passwordHash);
 
         $this->userRepository->expects($this->once())
             ->method('saveAndCommit')
-            ->willReturnCallback(function (User $savedUser) use ($request) {
-                $this->assertEquals($request->email, $savedUser->email);
+            ->willReturnCallback(function (User $savedUser) use ($email) {
+                $this->assertEquals($email->value, $savedUser->email->value);
 
                 $this->setEntityId($savedUser, 1);
             });
@@ -71,12 +73,12 @@ class AuthServiceTest extends AbstractTestCase
         $token = 'testToken';
         $this->JWTTokenManager->expects($this->once())
             ->method('create')
-            ->with($this->callback(fn(User $createdUser) => 'test@test.com' === $createdUser->email))
+            ->with($this->callback(fn(User $createdUser) => 'test@test.com' === $createdUser->email->value))
             ->willReturn($token);
 
         $expectedResponse = new SignUpResponseDTO(
             userId: $user->id,
-            email: $user->email,
+            email: $user->email->value,
             token: $token,
         );
         $result = $this->authService->signUp($request);
@@ -96,11 +98,12 @@ class AuthServiceTest extends AbstractTestCase
 
         $passwordHash = 'gdfgergerer3r34t4gffrerhg';
 
-        $user = $this->createUser($request->email, $passwordHash);
+        $email = Email::create($request->email);
+        $user = $this->createUser($email, $passwordHash);
 
         $this->userRepository->expects($this->once())
             ->method('existByEmail')
-            ->with($request->email)
+            ->with($email)
             ->willReturn(true);
 
         $this->passwordHasherFactory->expects($this->never())
@@ -119,7 +122,7 @@ class AuthServiceTest extends AbstractTestCase
     /**
      * @throws ReflectionException
      */
-    private function createUser(string $email, string $passwordHash): User
+    private function createUser(Email $email, string $passwordHash): User
     {
         $userId = 1;
         $user = User::createCustomer($email, $passwordHash);

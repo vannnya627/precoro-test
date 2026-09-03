@@ -14,6 +14,9 @@ use App\Repository\Interface\OrderRepositoryInterface;
 use App\Repository\Interface\UserRepositoryInterface;
 use App\Service\OrderService;
 use App\Tests\AbstractTestCase;
+use App\ValueObject\Email;
+use App\ValueObject\Price;
+use App\ValueObject\Quantity;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionException;
@@ -48,7 +51,7 @@ class OrderServiceTest extends AbstractTestCase
 
         $product = $this->createProduct();
 
-        $cart->addItem($product, 2);
+        $cart->addItem($product, Quantity::create(2));
 
         $this->userRepository->expects($this->once())
             ->method('getByEmail')
@@ -138,7 +141,7 @@ class OrderServiceTest extends AbstractTestCase
         $order = Order::create($user);
         $this->setEntityId($order, 10);
 
-        $cart->addItem($product, 2);
+        $cart->addItem($product, Quantity::create(2));
 
         $order->addItemsFromCart($cart->cartItems);
 
@@ -195,7 +198,7 @@ class OrderServiceTest extends AbstractTestCase
     private function createUser(): User
     {
         $userId = 1;
-        $user = User::createCustomer('test@gmail.com', 'dsgsfggdsgds');
+        $user = User::createCustomer(Email::create('test@gmail.com'), 'dsgsfggdsgds');
         $this->setEntityId($user, $userId);
 
         return $user;
@@ -207,7 +210,7 @@ class OrderServiceTest extends AbstractTestCase
     private function createProduct(): Product
     {
         $productId = 1;
-        $product = Product::create('Test Product', 'Test Description', 123);
+        $product = Product::create('Test Product', 'Test Description', Price::create(123));
         $this->setEntityId($product, $productId);
 
         return $product;

@@ -6,6 +6,8 @@ namespace App\Tests;
 
 use App\Entity\Product;
 use App\Entity\User;
+use App\ValueObject\Email;
+use App\ValueObject\Price;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -31,7 +33,7 @@ abstract class AbstractWebTestCase extends WebTestCase
         $hasher = $passwordHasherFactory->getPasswordHasher(User::class);
         $passwordHash = $hasher->hash('password');
 
-        $user = User::createCustomer('test@test.com', $passwordHash);
+        $user = User::createCustomer(Email::create('test@test.com'), $passwordHash);
 
         $em->persist($user);
         $em->flush();
@@ -39,7 +41,7 @@ abstract class AbstractWebTestCase extends WebTestCase
 
     public function createProduct(ObjectManager $em, int $price = 200): Product
     {
-        $product = Product::create('Test Product', 'Test Description', $price);
+        $product = Product::create('Test Product', 'Test Description', Price::create($price));
 
         $em->persist($product);
         $em->flush();

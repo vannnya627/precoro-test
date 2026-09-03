@@ -9,6 +9,7 @@ use App\DTO\Request\UpdateProductRequestDTO;
 use App\DTO\Response\ProductResponseDTO;
 use App\Entity\Product;
 use App\Repository\Interface\ProductRepositoryInterface;
+use App\ValueObject\Price;
 use Throwable;
 
 final readonly class ProductService
@@ -29,7 +30,7 @@ final readonly class ProductService
      */
     public function create(ProductRequestDTO $request): ProductResponseDTO
     {
-        $product = Product::create($request->name, $request->description, $request->price);
+        $product = Product::create($request->name, $request->description, Price::create($request->price));
         $this->productRepository->saveAndCommit($product);
 
         return ProductResponseDTO::create($product);
@@ -49,7 +50,11 @@ final readonly class ProductService
     public function update(int $productId, UpdateProductRequestDTO $request): ProductResponseDTO
     {
         $product = $this->productRepository->getById($productId);
-        $product->update($request->name, $request->description, $request->price);
+        $product->update(
+            newName: $request->name,
+            newDescription: $request->description,
+            newPrice: (null !== $request->price) ? Price::create($request->price) : null,
+        );
 
         $this->productRepository->saveAndCommit($product);
 

@@ -12,6 +12,7 @@ use App\Exception\ProductNotFoundException;
 use App\Repository\Interface\ProductRepositoryInterface;
 use App\Service\ProductService;
 use App\Tests\AbstractTestCase;
+use App\ValueObject\Price;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionException;
@@ -109,7 +110,7 @@ class ProductServiceTest extends AbstractTestCase
             ->willReturnCallback(function (Product $savedProduct) use ($request) {
                 $this->assertEquals($request->name, $savedProduct->name);
                 $this->assertEquals($request->description, $savedProduct->description);
-                $this->assertEquals($request->price, $savedProduct->price);
+                $this->assertEquals($request->price, $savedProduct->price->value);
 
                 $this->setEntityId($savedProduct, 1);
             });
@@ -145,7 +146,7 @@ class ProductServiceTest extends AbstractTestCase
             ->method('saveAndCommit')
             ->willReturnCallback(function (Product $savedProduct) use ($request) {
                 $this->assertEquals($request->name, $savedProduct->name);
-                $this->assertEquals($request->price, $savedProduct->price);
+                $this->assertEquals($request->price, $savedProduct->price->value);
 
                 $this->setEntityId($savedProduct, 1);
             });
@@ -223,7 +224,7 @@ class ProductServiceTest extends AbstractTestCase
     private function createProduct(): Product
     {
         $productId = 1;
-        $product = Product::create('Test Product', 'Test Description', 123);
+        $product = Product::create('Test Product', 'Test Description', Price::create(123));
         $this->setEntityId($product, $productId);
 
         return $product;

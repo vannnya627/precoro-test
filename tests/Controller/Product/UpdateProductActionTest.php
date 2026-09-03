@@ -39,9 +39,11 @@ class UpdateProductActionTest extends AbstractWebTestCase
 
         $em->clear();
 
+
+        /** @var Product $productInDb */
         $productInDb = $em->getRepository(Product::class)->find($product->id);
         $this->assertEquals('Updated Name', $productInDb->name);
-        $this->assertEquals(999, $productInDb->price);
+        $this->assertEquals(999, $productInDb->price->value);
     }
 
     public function testUpdateProductNotFound(): void

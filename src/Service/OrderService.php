@@ -12,6 +12,7 @@ use App\Exception\EmptyCartException;
 use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\OrderRepositoryInterface;
 use App\Repository\Interface\UserRepositoryInterface;
+use App\ValueObject\Email;
 use Throwable;
 
 final readonly class OrderService
@@ -25,7 +26,7 @@ final readonly class OrderService
     /**
      * @throws Throwable
      */
-    public function create(string $email): OrderResponseDTO
+    public function create(Email $email): OrderResponseDTO
     {
         $user = $this->userRepository->getByEmail($email);
         $cart = $this->cartRepository->findCartWithItemsAndProducts($user);
@@ -53,7 +54,7 @@ final readonly class OrderService
     /**
      * @return list<OrderResponseDTO>
      */
-    public function getList(string $email): array
+    public function getList(Email $email): array
     {
         $user = $this->userRepository->getByEmail($email);
         $orders = $this->orderRepository->findAllByUserIdWithProduct($user->id);

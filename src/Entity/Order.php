@@ -85,7 +85,7 @@ final class Order
     {
         $total = 0;
         foreach ($this->orderItems as $item) {
-            $total += $item->price * $item->quantity;
+            $total += $item->price->value * $item->quantity->value;
         }
         $this->totalPrice = $total;
     }

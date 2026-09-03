@@ -20,8 +20,8 @@ final readonly class OrderItemResponseDTO
         return new self(
             productId: $orderItem->product->id,
             productName: $orderItem->product->name,
-            quantity: $orderItem->quantity,
-            price: $orderItem->price,
+            quantity: $orderItem->quantity->value,
+            price: $orderItem->price->value,
         );
     }
 }

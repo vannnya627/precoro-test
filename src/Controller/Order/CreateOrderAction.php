@@ -8,6 +8,7 @@ use App\Attribute\RateLimiter;
 use App\DTO\Error\ErrorResponseDTO;
 use App\DTO\Response\OrderResponseDTO;
 use App\Service\OrderService;
+use App\ValueObject\Email;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -53,11 +54,11 @@ final class CreateOrderAction extends AbstractController
     )]
     public function __invoke(): JsonResponse
     {
-        $email = $this->getUser()?->getUserIdentifier();
-        if (!$email) {
+        $emailStr = $this->getUser()?->getUserIdentifier();
+        if (!$emailStr) {
             throw new UnauthorizedHttpException('Bearer', 'Користувач не авторизований');
         }
 
-        return $this->json($this->orderService->create($email));
+        return $this->json($this->orderService->create(Email::create($emailStr)));
     }
 }

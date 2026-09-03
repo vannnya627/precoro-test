@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\ValueObject\Email;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,13 +13,12 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use DateTimeImmutable;
 use Deprecated;
-use InvalidArgumentException;
 
 use function assert;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email.value'])]
 final class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -26,15 +26,8 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     public private(set) int $id;
 
-    #[ORM\Column(length: 180)]
-    public private(set) string $email {
-        set(string $value) {
-            if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                throw new InvalidArgumentException('Невалідний email');
-            }
-            $this->email = $value;
-        }
-    }
+    #[ORM\Embedded(class: Email::class, columnPrefix: false)]
+    public private(set) Email $email;
 
     /**
      * @var list<string> The user roles
@@ -75,9 +68,9 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        assert('' !== $this->email);
+        assert('' !== $this->email->value);
 
-        return $this->email;
+        return $this->email->value;
     }
 
     /**
@@ -142,7 +135,7 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public static function createCustomer(string $email, string $passwordHash): self
+    public static function createCustomer(Email $email, string $passwordHash): self
     {
         $user = new self();
         $user->email = $email;

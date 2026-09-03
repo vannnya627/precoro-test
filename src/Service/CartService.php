@@ -11,6 +11,8 @@ use App\Entity\CartItem;
 use App\Repository\Interface\CartRepositoryInterface;
 use App\Repository\Interface\ProductRepositoryInterface;
 use App\Repository\Interface\UserRepositoryInterface;
+use App\ValueObject\Email;
+use App\ValueObject\Quantity;
 
 final readonly class CartService
 {
@@ -20,7 +22,7 @@ final readonly class CartService
         private UserRepositoryInterface $userRepository,
     ) {}
 
-    public function addItem(AddItemRequestDTO $request, string $email): void
+    public function addItem(AddItemRequestDTO $request, Email $email): void
     {
         $user = $this->userRepository->getByEmail($email);
         $product = $this->productRepository->getById($request->productId);
@@ -32,7 +34,8 @@ final readonly class CartService
             $user->addCart($cart);
         }
 
-        $cart->addItem($product, $request->quantity);
+        $quantity = Quantity::create($request->quantity);
+        $cart->addItem($product, $quantity);
 
         $this->cartRepository->saveAndCommit($cart);
     }
@@ -40,7 +43,7 @@ final readonly class CartService
     /**
      * @return list<CartItemResponseDTO>
      */
-    public function getList(string $email): array
+    public function getList(Email $email): array
     {
         $user = $this->userRepository->getByEmail($email);
         $cart = $this->cartRepository->findCartWithItemsAndProducts($user);
@@ -56,7 +59,7 @@ final readonly class CartService
                 return new CartItemResponseDTO(
                     productId: $product->id,
                     productName: $product->name,
-                    quantity: $item->quantity,
+                    quantity: $item->quantity->value,
                 );
             })->toArray(),
         );

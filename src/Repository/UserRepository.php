@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\User;
 use App\Exception\UserNotFoundException;
 use App\Repository\Interface\UserRepositoryInterface;
+use App\ValueObject\Email;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -39,13 +40,13 @@ final class UserRepository extends ServiceEntityRepository implements PasswordUp
         $this->getEntityManager()->flush();
     }
 
-    public function existByEmail(string $email): bool
+    public function existByEmail(Email $email): bool
     {
-        return $this->count(['email' => $email]) > 0;
+        return $this->count(['email.value' => $email->value]) > 0;
     }
 
-    public function getByEmail(string $email): User
+    public function getByEmail(Email $email): User
     {
-        return $this->findOneBy(['email' => $email]) ?? throw new UserNotFoundException($email);
+        return $this->findOneBy(['email.value' => $email->value]) ?? throw new UserNotFoundException($email->value);
     }
 }
