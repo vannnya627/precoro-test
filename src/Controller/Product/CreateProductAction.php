@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
+use Throwable;
 
 #[OA\Tag('ProductController')]
 #[RateLimiter]
@@ -23,6 +24,9 @@ final class CreateProductAction extends AbstractController
 {
     public function __construct(private readonly ProductService $productService) {}
 
+    /**
+     * @throws Throwable
+     */
     #[OA\Post(
         operationId: 'api_create_product',
         description: 'Створення нового продукту юзером',
